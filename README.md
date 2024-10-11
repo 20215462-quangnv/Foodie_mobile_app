@@ -17,9 +17,9 @@
 
 ## Building
 
-- Create and start a new device with android studio
-- Run script: npm start (npm expo start)
-  After running this, expo will take care everything about building and rendering app.
+# Create and start a new device with android studio
+# Run script: npm start (npm expo start)
+ # After running this, expo will take care everything about building and rendering app.
   The first build may take a while.
 
 ## Developing
