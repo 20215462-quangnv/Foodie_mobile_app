@@ -7,13 +7,13 @@
 - In case you haven't installed expo through npm installation, download and install expo -CLI for later use
 - Setup all environment for android (Using android studio), which includes:
 
-* Cmake
-* Android SDK build-tool
-* Android SDK platform
-* Android Emulator
-* NDK (side-by-side)
-* Android 15 (VanillaCream) and Android 14 (UpsideDownCaked)
-* Hermes (optional)
+  * Cmake
+  * Android SDK build-tool
+  * Android SDK platform
+  * Android Emulator
+  * NDK (side-by-side)
+  * Android 15 (VanillaCream) and Android 14 (UpsideDownCaked)
+  * Hermes (optional)
 
 ## Building
 
