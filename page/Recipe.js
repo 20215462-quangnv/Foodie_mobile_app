@@ -11,29 +11,15 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import Footer from '../layout/Footer';
 
-const HomeScreen = ({ navigation })=> {
+const RecipeScreen = ({ navigation })=> {
 const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
   return (
     <View style={styles.container}>
       {/* Header */}
         <View style={styles.header}>
-            <TouchableOpacity style={styles.notiButton}>
-                <Icon name="bell" size={24} color="white" />
-            </TouchableOpacity>
-
             <View style = {styles.title}>
-                <Text style={styles.titleText}>Foodies</Text>
+                <Text style={styles.titleText}>Add New Item</Text>
             </View>
-
-            <View style = {styles.buttonGroup}>
-                <TouchableOpacity style={styles.avatarButton}>
-                    <Text style={styles.circleButtonText}>H</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.addButton}>
-                    <Icon name="plus" size={24} color="white" />
-                </TouchableOpacity>
-            </View>
-        
         </View>
 
         {/* Body */}
@@ -78,10 +64,9 @@ const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
                                 <Text style={styles.titleSuggest}>Item {i}</Text>
                                 <Image
                                     source={{
-                                    uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/640px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
+                                    uri: "https://t4.ftcdn.net/jpg/05/38/99/75/360_F_538997597_wXUHi67t6VMLEcVTW2c6D2P9F0e1f6yE.jpg",
                                     }}
                                     style={styles.imageSuggest}
-                                    onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                 />
                             </View>
                         ))}
@@ -96,10 +81,9 @@ const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
                                 <View style={styles.leftItem}> 
                                     <Image
                                         source={{
-                                            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/640px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
+                                            uri: "https://t4.ftcdn.net/jpg/05/38/99/75/360_F_538997597_wXUHi67t6VMLEcVTW2c6D2P9F0e1f6yE.jpg",
                                         }}
                                         style={styles.imageWarning}
-                                        onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                     />
                                     <Text style={styles.itemText}>{item}</Text>
                                 </View>
@@ -122,7 +106,7 @@ const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
         </View>
 
         {/* Footer */}
-        
+      
     </View>
   );
 };
@@ -342,4 +326,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default HomeScreen;
+export default RecipeScreen;

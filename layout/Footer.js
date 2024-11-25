@@ -1,27 +1,84 @@
-// Footer.js
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation hook
 
 const Footer = () => {
+  const [activeTab, setActiveTab] = useState("Home");
+
+  // Sử dụng hook useNavigation để lấy đối tượng navigation
+  const navigation = useNavigation();
+
+  // Hàm để điều hướng khi người dùng nhấn vào các tab
+  const handlePress = (tabName) => {
+    setActiveTab(tabName); // Cập nhật tab hiện tại
+    navigation.navigate(tabName); // Điều hướng đến màn hình tương ứng
+  };
   return (
     <View style={styles.footerContainer}>
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.iconContainer}>
-          <Icon name="home" size={24} color="white" />
-          <Text style={styles.iconText}>HOME</Text>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Recipe")}
+        >
+          
+            <Icon
+              name="utensils"
+              size={24}
+              color={activeTab === "Recipe" ? "yellow" : "white"}
+            />
+          
+          <Text style={[styles.iconText, activeTab === "Recipe" && { color: "yellow" }]}>RECIPE</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconContainer}>
-          <View style={styles.plusButton}>
-            <Icon name="plus-circle" size={28} color="white" />
-          </View>
-          <Text style={styles.iconText}>NEW</Text>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Store")}
+        >
+         
+            <Icon
+              name="store"
+              size={24}
+              color={activeTab === "Store" ? "yellow" : "white"}
+            />
+         
+          <Text style={[styles.iconText, activeTab === "Store" && { color: "yellow" }]}>STORE</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.iconContainer}>
-          <Icon name="comments" size={24} color="white" />
-          <Text style={styles.iconText}>CHAT</Text>
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Home")}
+        >
+          <Icon
+            name="home"
+            size={24}
+            color={activeTab === "Home" ? "yellow" : "white"}
+          />
+          <Text style={[styles.iconText, activeTab === "Home" && { color: "yellow" }]}>HOME</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Task")}
+        >
+          <Icon
+            name="clipboard-list"
+            size={24}
+            color={activeTab === "Task" ? "yellow" : "white"}
+          />
+          <Text style={[styles.iconText, activeTab === "Task" && { color: "yellow" }]}>TASK</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Chat")}
+        >
+          <Icon
+            name="comments"
+            size={24}
+            color={activeTab === "Chat" ? "yellow" : "white"}
+          />
+          <Text style={[styles.iconText, activeTab === "Chat" && { color: "yellow" }]}>CHAT</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -29,21 +86,20 @@ const Footer = () => {
 };
 
 const styles = StyleSheet.create({
-  footerContainer: {
-    flex: 1.5,
-    backgroundColor: "#fff",
-  },
+ footerContainer: {
+    marginBottom: 20,
+ },
   footer: {
     alignItems: "center",
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     height: 80,
-    backgroundColor: '#4caf50',
+    backgroundColor: "#4caf50",
     borderRadius: 10,
     marginTop: 10,
     marginLeft: 10,
     marginRight: 10,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
@@ -53,10 +109,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   iconContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   iconText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
     marginTop: 5,
   },
@@ -64,8 +120,8 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
