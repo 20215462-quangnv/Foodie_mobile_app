@@ -13,7 +13,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Footer from '../layout/Footer';
-import { getAllRecipes } from '../recipeController';
+import { getAllRecipes } from '../controller/RecipeController';
 
 
 const RecipeScreen = ({ navigation }) => {
