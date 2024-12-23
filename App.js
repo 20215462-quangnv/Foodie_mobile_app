@@ -2,11 +2,11 @@ import React from "react";
 import { SafeAreaView, StatusBar, View } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
-import LoginScreen from "./Login";
 import ChatScreen from "./page/Chat";
 import HomeScreen from "./page/Home";
 import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
+import LoginScreen from "./page/Login";
 import CreateGroupScreen from "./page/CreateGroupScreen";
 import Footer from "./layout/Footer";
 import GroupScreen from "./page/GroupScreen";
@@ -20,6 +20,11 @@ const App = () => {
         <StatusBar barStyle="dark-content" />
 
         <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             name="Recipe"
             component={RecipeScreen}

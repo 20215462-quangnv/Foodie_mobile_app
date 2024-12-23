@@ -27,3 +27,6 @@
 - Every new screen needs to be setup as a new file, with capital first letter
 - Several used components must be stored in the same folder
 - Icons, pictures should be stored in assets or some similar directory
+
+
+//token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzMxMjQwMTUsImV4cCI6MTczMzIxMDQxNX0.Z4NmDkUvfGj3EKd53uFeSNB0AWmR5Z7mufMJ7iNzjS4
