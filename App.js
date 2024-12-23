@@ -7,7 +7,9 @@ import ChatScreen from "./page/Chat";
 import HomeScreen from "./page/Home";
 import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
-import Footer from "./layout/Footer"; // Import Footer component
+import CreateGroupScreen from "./page/CreateGroupScreen";
+import Footer from "./layout/Footer";
+import GroupScreen from "./page/GroupScreen";
 
 const Stack = createStackNavigator();
 
@@ -16,7 +18,7 @@ const App = () => {
     <NavigationContainer>
       <SafeAreaView style={{ flex: 1 }}>
         <StatusBar barStyle="dark-content" />
-        
+
         <Stack.Navigator initialRouteName="Home">
           <Stack.Screen
             name="Recipe"
@@ -38,9 +40,38 @@ const App = () => {
             component={ChatScreen}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="CreateGroupScreen"
+            component={CreateGroupScreen}
+            options={{
+              title: "Create New Group",
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: "#4EA72E",
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
+          />
+          <Stack.Screen
+            name="GroupScreen"
+            component={GroupScreen}
+            options={{
+              title: "Group Details",
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: "#4EA72E",
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
+          />
         </Stack.Navigator>
 
-        {/* Đặt Footer sau Stack.Navigator để nó luôn xuất hiện dưới cùng */}
         <Footer />
       </SafeAreaView>
     </NavigationContainer>
