@@ -11,24 +11,61 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { getAllFoodByGroup } from "../../../controller/FoodController";
 import { updateRecipe } from "/home/vietbuiduc/Documents/Foodie_mobile_app/controller/RecipeController.js"
 
-const EditRecipeScreen = ({ editedItem, setEditedItem, setModalVisible }) => {
+const EditRecipeScreen = ({ setItems, editedItem, setEditedItem, setModalVisible }) => {
     const [showFoodSelectModal, setShowFoodSelectModal] = useState(false); // Modal chọn món ăn
     const [selectedFoods, setSelectedFoods] = useState(editedItem.food || []); // Danh sách món ăn đã chọn
+    const [listFood, setListFood] = useState();
   
+
+
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const data = await getAllFoodByGroup();  // Chờ kết quả từ API
+          setListFood(data.data.map(item => ({
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            description: item.description,
+            imageUrl: item.imageUrl,
+            measureUnit: item.measureUnit.unitName,
+            foodCategory: item.foodCategory.name,
+            })));  // Cập nhật state với dữ liệu nhận được
+          console.log(data);
+        } catch (error) {
+          setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+        }
+      }
+      
+      fetchData();  // Gọi hàm fetchData
+    }, []);  // Chạy chỉ một lần khi component mount 
     // Hàm lưu dữ liệu
     const handleSave = () => {
       setModalVisible(false); // Đóng modal khi lưu xong
-      updateRecipe(editedItem.id, editedItem)
+      const body = {
+      name: editedItem.name,
+      description: editedItem.description,
+      htmlContent: editedItem.htmlContent,
+      foodId: editedItem.food.id,
+      authorId: editedItem.authorId
+      }
+      updateRecipe(editedItem.id, body)
       .then((updatedRecipe) => {
         // Nếu thành công, thêm công thức mới vào danh sách
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+              item.id === editedItem.id ? { ...item, ...editedItem } : item
+          )
+      );
         setModalVisible(false);
         console.log('Item successfully update:', updatedRecipe);
       })
       .catch((error) => {
         // Nếu thất bại, log lỗi và hiển thị thông báo
-        console.error('Failed to create recipe:', error);
+        console.error('Failed to update recipe:', error);
       });
     };
   
@@ -75,6 +112,14 @@ const EditRecipeScreen = ({ editedItem, setEditedItem, setModalVisible }) => {
               onChangeText={(text) => setEditedItem({ ...editedItem, description: text })}
               placeholder="Recipe Description"
             />
+             <Text style={styles.foodDescription}>Content</Text>
+            <TextInput
+              style={styles.inputField}
+               multiline={true}
+              value={editedItem.htmlContent}
+              onChangeText={(text) => setEditedItem({ ...editedItem, htmlContent: text })}
+              placeholder="Recipe Content"
+            />
 
             {/* Danh sách các món ăn đã chọn */}
             
@@ -115,7 +160,7 @@ const EditRecipeScreen = ({ editedItem, setEditedItem, setModalVisible }) => {
                     }}
                   >
                     <Text>{food.name}</Text>
-                    <Image source={{ uri: food.image }} style={styles.foodImage} />
+                    <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
                     <Text>{food.type}</Text>
                   </TouchableOpacity>
                 ))}
@@ -145,7 +190,7 @@ const styles = StyleSheet.create({
     },
     modalWrapper: {
         width: 320,
-        height: 500,
+        height: 700,
         padding: 20,
         backgroundColor: "white",
         borderRadius: 12,
@@ -156,7 +201,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     inputField: {
-        height: 45,
+        maxHeight: 200,
         borderColor: "#ddd",
         borderWidth: 1,
         marginBottom: 18,
@@ -202,7 +247,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     addFoodButton: {
-        marginTop: 12,
+        marginTop: 48,
         marginBottom: 12,
         padding: 10,
         backgroundColor: "#4CAF50",
@@ -232,6 +277,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
+        marginTop: 'auto',
     },
     saveButton: {
         backgroundColor: "#4CAF50",

@@ -28,7 +28,6 @@ const StoreScreen = ({ navigation }) => {
                 useWithin : useWithin,
                 note : note,
                 foodId : foodId,
-                groupId : groupId,
                 ownerId : ownerId,
               })));  
             console.log(data);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect} from "react";
 import { 
     View, 
     Text, 
@@ -10,9 +10,59 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Footer from '../layout/Footer';
-
+import { getFridgeGroup, getAllFridgeGroup } from "../controller/FridgeController";
+import { getAllRecipes } from "../controller/RecipeController";
 const HomeScreen = ({ navigation })=> {
-const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
+  const [fridgeItems, setFridgeItems] = useState([]);
+  const [recipeItems, setRecipeItems] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getAllRecipes();  // Chờ kết quả từ API
+        setRecipeItems(data.data.map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            htmlContent: item.htmlContent,
+            authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
+            food: item.food,  // Truy cập vào 'food' và lấy 'type'
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt
+          })));  // Cập nhật state với dữ liệu nhận được
+        console.log(recipeItems);
+      } catch (error) {
+        setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+      }
+    }
+    
+    fetchData();  // Gọi hàm fetchData
+  }, []);  // Chạy chỉ một lần khi component mount 
+  useEffect(() => {
+        async function fetchData() {
+          try {
+            const data = await getAllFridgeGroup();  
+            setFridgeItems(data.data.map(item => ({
+                foodName : foodName,
+                quantity : quantity,
+                useWithin : useWithin,
+                note : note,
+                foodId : foodId,
+                ownerId : ownerId,
+              })));  
+            console.log(data);
+          } catch (error) {
+            setError('Error fetching fridge');  
+          }
+        }
+        
+        fetchData(); 
+  }, []);
+
+
+
+
+
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -73,12 +123,12 @@ const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
                         Dựa theo tủ của bạn
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {Array.from({ length: 10 }, (_, i) => (
+                        {recipeItems.map((item, i)  => (
                             <View key={i} style={styles.itemSuggest}>
-                                <Text style={styles.titleSuggest}>Item {i}</Text>
+                                <Text style={styles.titleSuggest}>{item.name}</Text>
                                 <Image
                                     source={{
-                                    uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/640px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
+                                    uri: item.food.imageUrl
                                     }}
                                     style={styles.imageSuggest}
                                     onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
@@ -91,7 +141,7 @@ const items = Array.from({ length: 20 }, (_, i) => `Item ${i + 1}`);
                 <ScrollView style={styles.scrollViewWarning}>
                     
                         <View style={styles.itemHolder}>
-                        {items.map((item, index) => (
+                        {fridgeItems.map((item, index) => (
                             <View key={index} style={styles.itemContainer}>
                                 <View style={styles.leftItem}> 
                                     <Image

@@ -1,10 +1,10 @@
 // Định nghĩa URL của API
 import Config from 'react-native-config';
 import { DataTable } from 'react-native-paper';
-const API_URL = 'http://192.168.1.27:8080/api/recipe';
+const API_URL = 'http://192.168.0.6:8080/api/recipe';
 
 // Hàm gọi API GET để lấy tất cả các recipe
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzQ3NjkyOTgsImV4cCI6MTczNDg1NTY5OH0.e2FDy4j58cqspLbNlbaxl56pjs_8Iq1C7GooOz9-EP8`;
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzQ5NTQ1ODQsImV4cCI6MTczNTA0MDk4NH0.rJpLbh4hbUt5g5wRqQBYKVLimiqmublL-ypIQ5zg3hw`;
 function getAllRecipes() {
   console.log(bearerAuth);
   return fetch(API_URL, {
@@ -60,7 +60,8 @@ function createRecipe(newRecipe) {
 
 // Hàm gọi API PUT để cập nhật một recipe
 function updateRecipe(recipeId, updatedRecipe) {
-  fetch(`${API_URL}/${recipeId}`, {
+  console.log('Id   :', recipeId); 
+  return fetch(`${API_URL}/${recipeId}`, {
     method: 'PUT',  // Phương thức PUT
     headers: {
       'Content-Type': 'application/json',
@@ -72,6 +73,7 @@ function updateRecipe(recipeId, updatedRecipe) {
   })
     .then(response => {
       if (response.ok) {
+        console.log(response);
         return response.json();  // Chuyển phản hồi thành JSON
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -88,7 +90,8 @@ function updateRecipe(recipeId, updatedRecipe) {
 
 // Hàm gọi API DELETE để xóa một recipe
 function deleteRecipe(recipeId) {
-  fetch(`${API_URL}/${recipeId}`, {
+  console.log("recipeId "+ recipeId);
+  return fetch(`${API_URL}/${recipeId}`, {
     method: 'DELETE',  // Phương thức DELETE
     headers: {
       'Content-Type': 'application/json',

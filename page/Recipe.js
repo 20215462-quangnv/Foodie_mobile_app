@@ -13,7 +13,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Footer from '../layout/Footer';
-import { getAllRecipes, createRecipe } from '../controller/RecipeController';
+import { getAllRecipes, createRecipe, deleteRecipe } from '../controller/RecipeController';
 import { getUserProfile } from "../controller/UserController.js";
 import EditRecipeScreen from './NewScreenTab/Recipetab/EditRecipeScreen.js';
 
@@ -42,6 +42,8 @@ const RecipeScreen = ({ navigation }) => {
                 id: item.id,
                 name: item.name,
                 description: item.description,
+                htmlContent: item.htmlContent,
+                authorId: item.author.id,
                 authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
                 food: item.food,  // Truy cập vào 'food' và lấy 'type'
                 createdAt: item.createdAt,
@@ -87,14 +89,14 @@ const RecipeScreen = ({ navigation }) => {
       
         setAddItemModalVisible(true);
     };
-    const handleSave = () => {
-        setItems((prevItems) =>
-            prevItems.map((item) =>
-                item.id === editedItem.id ? { ...item, ...editedItem } : item
-            )
-        );
-        setModalVisible(false);
-    };
+    // const handleSave = () => {
+    //     setItems((prevItems) =>
+    //         prevItems.map((item) =>
+    //             item.id === editedItem.id ? { ...item, ...editedItem } : item
+    //         )
+    //     );
+    //     setModalVisible(false);
+    // };
     const handleSaveAddedItem = () => {
         setAddingItem(null);
         const newItem = {
@@ -164,10 +166,23 @@ const RecipeScreen = ({ navigation }) => {
         setSelectedItems([]); // Dọn dẹp các item đã chọn
     };
 
-    const deleteSelectedItems = () => {
-        const newItems = items.filter(item => !selectedItems.includes(item.id));
-        setItems(newItems); // Cập nhật lại danh sách items sau khi xóa
-        cancelSelection(); // Hủy chế độ chọn sau khi xóa
+    const handleDeleteSelectedItems = () => {
+        console.log("selectedItems "+  selectedItems);
+        Promise.all(
+            selectedItems.map(item => deleteRecipe(item))
+          )
+          .then(() => {
+            // Cập nhật lại danh sách items sau khi xóa
+            const newItems = items.filter(item => !selectedItems.includes(item.id));
+            setItems(newItems); 
+        
+            // Hủy chế độ chọn sau khi xóa
+            cancelSelection(); 
+            console.log('Selected items deleted successfully');
+          })
+          .catch(error => {
+            console.error('Error deleting selected items:', error);
+          });
     };
 
 
@@ -260,7 +275,7 @@ const RecipeScreen = ({ navigation }) => {
                                             />
                                             <Text style={styles.selectAllText}>All</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={deleteSelectedItems} style={styles.deleteButton}>
+                                        <TouchableOpacity onPress={handleDeleteSelectedItems} style={styles.deleteButton}>
                                             <Text style={styles.deleteButtonText}>Delete Selected Items</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={cancelSelection} style={styles.cancelButton}>
@@ -289,7 +304,7 @@ const RecipeScreen = ({ navigation }) => {
                                                 </TouchableOpacity>
                                             )}
                                             <Image
-                                                source={{ uri: item.image }}
+                                                source={{ uri: item.food.imageUrl }}
                                                 style={styles.imageWarning}
                                                 onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                             />
@@ -297,8 +312,8 @@ const RecipeScreen = ({ navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            <Text style={styles.textRed}>{item.food.name}</Text>
-                                            <Text style={styles.textRed}>{item.name}</Text>
+                                            {/* <Text style={styles.textRed}>{item.name}</Text> */}
+                                            <Text style={styles.textRed}>Món ăn: {item.food.name}</Text>
                                             <Text style={styles.normalText}>Mô tả: {item.description}</Text>
                                             <Text style={styles.normalText}>Tạo bởi: {item.authorName}</Text>
                                             <Text style={styles.normalText}>Created at: {new Date(item.createdAt).toDateString()}</Text>
@@ -329,6 +344,7 @@ const RecipeScreen = ({ navigation }) => {
                 <View style={styles.modalBackground}>
                     <View style={styles.modalContainer}>
                     <EditRecipeScreen 
+                        setItems={setItems}
                         editedItem={editedItem} 
                         setEditedItem={setEditedItem} 
                         listFood={editedItem.food} 
@@ -368,33 +384,6 @@ const RecipeScreen = ({ navigation }) => {
                                
                             />
                            
-                            {/* <TextInput
-                                style={styles.modalInput}
-                               
-                                onChangeText={(text) => setAddingItem({ ...addingItem, date: text })}
-                                placeholder="Expiration Date"
-                            /> */}
-                              {/* <TouchableOpacity
-                                style={styles.modalInput}
-                                onPress={() => setShowDatePicker(true)} // Show date picker when pressed
-                            >
-                                <Text>{addingItem.date ? addingItem.date.toDateString() : "Expiration Date"}</Text>
-                            </TouchableOpacity> */}
-                          
-                            {/* {showDatePicker && (
-                                <DateTimePicker
-                                    style={styles.modalInput}
-                                    value={addingItem.date ? new Date(addingItem.date) : new Date()} // Ensure it's a Date object
-                                    mode="date" // You can also use "time" or "datetime" based on the requirement
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        setShowDatePicker(false); // Hide date picker after selection
-                                        if (selectedDate) {
-                                            setAddingItem({ ...addingItem, date: selectedDate });
-                                        }
-                                    }}
-                                />
-                            )} */}
                             <View style={styles.buttonHolder}>
                                 <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
                                     <Text style={styles.saveButtonText}>Save</Text>
