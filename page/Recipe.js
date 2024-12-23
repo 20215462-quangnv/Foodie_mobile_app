@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
     View, 
     Text, 
@@ -13,17 +13,41 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Footer from '../layout/Footer';
-import { getAllRecipes } from '../recipeController';
+import { getAllRecipes, createRecipe } from '../controller/RecipeController';
+import { getUserProfile } from "../controller/UserController.js";
+import EditRecipeScreen from './NewScreenTab/Recipetab/EditRecipeScreen.js';
 
 
 const RecipeScreen = ({ navigation }) => {
-   
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        async function fetchData() {
+          try {
+            const data = await getUserProfile();  // Chờ kết quả từ API
+            setUser(data.data)
+            console.log(data);
+          } catch (error) {
+            setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+          }
+        }
+        
+        fetchData();  // Gọi hàm fetchData
+      }, []);  // Chạy chỉ một lần khi component mount
     const [items, setItems] = useState([]);
     useEffect(() => {
         async function fetchData() {
           try {
             const data = await getAllRecipes();  // Chờ kết quả từ API
-            setItems(data);  // Cập nhật state với dữ liệu nhận được
+            setItems(data.data.map(item => ({
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
+                food: item.food,  // Truy cập vào 'food' và lấy 'type'
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt
+              })));  // Cập nhật state với dữ liệu nhận được
+            console.log(data);
           } catch (error) {
             setError('Error fetching recipes');  // Cập nhật lỗi nếu có
           }
@@ -74,15 +98,26 @@ const RecipeScreen = ({ navigation }) => {
     const handleSaveAddedItem = () => {
         setAddingItem(null);
         const newItem = {
-            id: items.length + 1, // Hoặc dùng logic tạo ID khác
-            name: addingItem.name || "New Item",
-            image: "https://t4.ftcdn.net/jpg/05/38/99/75/360_F_538997597_wXUHi67t6VMLEcVTW2c6D2P9F0e1f6yE.jpg", // Hình mặc định
-            quantity: addingItem.quantity || 1,
-            state: addingItem.state || "Available",
-            date: addingItem.date || new Date().toISOString().split("T")[0], // Ngày mặc định là hôm nay
+
+            name: addingItem.name,
+            description: addingItem.description,
+            foodId: 2,  // Truy cập vào 'food' và lấy 'type'
+            authorId: user.id,  
         };
-        setItems((prevItems) => [...prevItems, newItem]);
-        setAddItemModalVisible(false); 
+        createRecipe(newItem)
+        .then((createdRecipe) => {
+          // Nếu thành công, thêm công thức mới vào danh sách
+          setItems((prevItems) => [...prevItems, createdRecipe]);
+          setAddItemModalVisible(false);
+          setAddingItem(null);
+          console.log('Item successfully added:', createdRecipe);
+        })
+        .catch((error) => {
+          // Nếu thất bại, log lỗi và hiển thị thông báo
+          console.error('Failed to create recipe:', error);
+        });
+        //setItems((prevItems) => [...prevItems, newItem]);
+        //setAddItemModalVisible(false); 
     };
     
     const applyFilter = () => {
@@ -103,7 +138,8 @@ const RecipeScreen = ({ navigation }) => {
         if (isSelectionMode) {
             toggleSelectItem(item.id); // Chọn/bỏ chọn nếu đang ở chế độ chọn
         } else {
-            openModal(item); // Thực hiện hành động khi nhấn
+            setEditedItem(item)
+            setModalVisible(true); // Thực hiện hành động khi nhấn
         }
     };
 
@@ -137,26 +173,26 @@ const RecipeScreen = ({ navigation }) => {
 
     // Filter logic for sorting and filtering items based on multiple filters
     const filteredItems = () => {
-        let filteredItems = [...items]; // Assuming items is your original list
+        let result = [...items]; // Assuming items is your original list
 
 // Assuming selectedFilter is the current selected filter
         // Example selected filter, could come from your state
 
         switch (selectedFilter) {
             case 'quantity_desc':
-                filteredItems = filteredItems.sort((a, b) => b.quantity - a.quantity);
+                result = filteredItems.sort((a, b) => b.quantity - a.quantity);
                 break;
             case 'quantity_asc':
-                filteredItems = filteredItems.sort((a, b) => a.quantity - b.quantity);
+                result = filteredItems.sort((a, b) => a.quantity - b.quantity);
                 break;
             case 'date_asc':
-                filteredItems = filteredItems.sort((a, b) => new Date(a.date) - new Date(b.date));
+                result = filteredItems.sort((a, b) => new Date(a.date) - new Date(b.date));
                 break;
             case 'date_desc':
-                filteredItems = filteredItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+                result = filteredItems.sort((a, b) => new Date(b.date) - new Date(a.date));
                 break;
             case 'expired':
-                filteredItems = filteredItems.filter(item => item.state === "Expired");
+                result = filteredItems.filter(item => item.state === "Expired");
                 break;
             default:
                 break;
@@ -165,11 +201,11 @@ const RecipeScreen = ({ navigation }) => {
         //console.log(filteredItems);
 
         if (searchQuery.trim()) {
-            filteredItems = filteredItems.filter(item =>
+            result = filteredItems.filter(item =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
-        return filteredItems;
+        return result;
     };
 
     return (
@@ -253,7 +289,7 @@ const RecipeScreen = ({ navigation }) => {
                                                 </TouchableOpacity>
                                             )}
                                             <Image
-                                                source={{ uri: item.htmlContent }}
+                                                source={{ uri: item.image }}
                                                 style={styles.imageWarning}
                                                 onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                             />
@@ -261,10 +297,10 @@ const RecipeScreen = ({ navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                        
+                                            <Text style={styles.textRed}>{item.food.name}</Text>
                                             <Text style={styles.textRed}>{item.name}</Text>
                                             <Text style={styles.normalText}>Mô tả: {item.description}</Text>
-                                            <Text style={styles.normalText}>Tạo bởi: {item.author.fullName}</Text>
+                                            <Text style={styles.normalText}>Tạo bởi: {item.authorName}</Text>
                                             <Text style={styles.normalText}>Created at: {new Date(item.createdAt).toDateString()}</Text>
                                         </View>
                                     </TouchableOpacity>
@@ -290,61 +326,16 @@ const RecipeScreen = ({ navigation }) => {
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                    <View style={styles.modalBackground}>
-                        <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Edit Item</Text>
-                            <TextInput
-                                style={styles.modalInput}
-                                value={editedItem.name}
-                                onChangeText={(text) => setEditedItem({ ...editedItem, name: text })}
-                                placeholder="Item Name"
-                            />
-                            <TextInput
-                                style={styles.modalInput}
-                                value={editedItem.quantity?.toString()}
-                                onChangeText={(text) => setEditedItem({ ...editedItem, quantity: parseInt(text) })}
-                                placeholder="Quantity"
-                                keyboardType="numeric"
-                            />
-                            <TextInput
-                                style={styles.modalInput}
-                                value={editedItem.state}
-                                onChangeText={(text) => setEditedItem({ ...editedItem, state: text })}
-                                placeholder="State"
-                            />
-                              <TouchableOpacity
-                                style={styles.modalInput}
-                                onPress={() => setShowDatePicker(true)} // Show date picker when pressed
-                            >
-                                <Text>{editedItem.date ? editedItem.date.toDateString() : "Select Date"}</Text>
-                            </TouchableOpacity>
-                          
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    style={styles.modalInput}
-                                    value={editedItem.date ? new Date(editedItem.date) : new Date()} // Ensure it's a Date object
-                                    mode="date" // You can also use "time" or "datetime" based on the requirement
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        setShowDatePicker(false); // Hide date picker after selection
-                                        if (selectedDate) {
-                                            setEditedItem({ ...editedItem, date: selectedDate });
-                                        }
-                                    }}
-                                />
-                            )}
-
-                            <View style={styles.buttonHolder}>
-                                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                                    <Text style={styles.saveButtonText}>Save</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.cancelButton} onPress={() => setModalVisible(false)}>
-                                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                                </TouchableOpacity>
-                            </View>
-                            
-                        </View>
-                    </View>
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalContainer}>
+                    <EditRecipeScreen 
+                        editedItem={editedItem} 
+                        setEditedItem={setEditedItem} 
+                        listFood={editedItem.food} 
+                        setModalVisible={setModalVisible}
+                    />
+                </View>
+                </View>
             </Modal>
              {/* Add new Item Modal */}
              <Modal
@@ -369,6 +360,14 @@ const RecipeScreen = ({ navigation }) => {
                                 placeholder="Recipe Description"
                                
                             />
+                            <TextInput
+                                style={styles.modalInput}
+                               
+                                onChangeText={(text) => setAddingItem({ ...addingItem, content: text })}
+                                placeholder="Recipe Content"
+                               
+                            />
+                           
                             {/* <TextInput
                                 style={styles.modalInput}
                                

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect} from "react";
 import { 
     View, 
     Text, 
@@ -13,28 +13,32 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Footer from '../layout/Footer';
-
+import { getFridgeGroup, getAllFridgeGroup } from "../controller/FridgeController";
 
 
 const StoreScreen = ({ navigation }) => {
-    // Updated items with properties (name, image, quantity, state, date)
-    const getRandomNumber = (min, max) => {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-      };
-      const getRandomDateInNovember = () => {
-        const year = 2024;
-        const month = 10; // Tháng 11, vì tháng trong JavaScript được tính từ 0 (0 là tháng 1, 10 là tháng 11)
-        const day = Math.floor(Math.random() * 30) + 1; // Chọn một ngày ngẫu nhiên trong tháng 11 (30 ngày)
-        return new Date(year, month, day);
-    };
-    const [items, setItems] = useState(Array.from({ length: 20 }, (_, i) => ({
-        id: i + 1,
-        name: `Item ${i + 1}`,
-        image: "https://t4.ftcdn.net/jpg/05/38/99/75/360_F_538997597_wXUHi67t6VMLEcVTW2c6D2P9F0e1f6yE.jpg",
-        quantity: getRandomNumber(10, 20),
-        state: "Expired",
-        date:  getRandomDateInNovember(),
-    })));
+    const [items, setItems] = useState([]);
+    useEffect(() => {
+        async function fetchData() {
+          try {
+            const data = await getAllFridgeGroup();  
+            setItems(data.data.map(item => ({
+                foodName : foodName,
+                quantity : quantity,
+                useWithin : useWithin,
+                note : note,
+                foodId : foodId,
+                groupId : groupId,
+                ownerId : ownerId,
+              })));  
+            console.log(data);
+          } catch (error) {
+            setError('Error fetching fridge');  
+          }
+        }
+        
+        fetchData(); 
+      }, []);
 
     // Popup state
     const [modalVisible, setModalVisible] = useState(false);
@@ -71,7 +75,7 @@ const StoreScreen = ({ navigation }) => {
     const handleSave = () => {
         setItems((prevItems) =>
             prevItems.map((item) =>
-                item.id === editedItem.id ? { ...item, ...editedItem } : item
+                item.foodId === editedItem.foodId ? { ...item, ...editedItem } : item
             )
         );
         setModalVisible(false);
