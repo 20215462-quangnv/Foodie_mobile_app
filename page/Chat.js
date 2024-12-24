@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome"; // Make sure to install this package
+import Icon from "react-native-vector-icons/FontAwesome";
 import { getAllGroups } from "../controller/GroupController";
 import { useNavigation } from "@react-navigation/native";
 
@@ -17,8 +17,14 @@ const ChatScreen = () => {
   useEffect(() => {
     async function fetchGroups() {
       try {
-        const data = await getAllGroups();
-        setGroups(data);
+        const response = await getAllGroups();
+        // Truy cập vào "data" trong response để lấy mảng các group
+        const fetchedGroups = response.data;
+
+        // Kiểm tra và log dữ liệu nhóm
+        console.log("Fetched groups:", fetchedGroups);
+
+        setGroups(fetchedGroups);
       } catch (error) {
         console.error("Error fetching groups:", error);
       }
@@ -26,7 +32,10 @@ const ChatScreen = () => {
     fetchGroups();
   }, []);
 
-  // Render item trong FlatList
+  const filteredGroups = Array.isArray(groups)
+    ? groups.filter((group) => group.enable === true)
+    : [];
+
   const renderGroup = ({ item }) => (
     <TouchableOpacity
       style={styles.groupCard}
@@ -49,10 +58,15 @@ const ChatScreen = () => {
       </View>
 
       <FlatList
-        data={groups}
+        data={filteredGroups}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderGroup}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No groups available.</Text>
+          </View>
+        }
       />
 
       <TouchableOpacity
@@ -112,10 +126,20 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 2,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+  },
   addButton: {
     position: "absolute",
     right: 20,
-    bottom: 80, // Increased to account for Footer
+    bottom: 80, // Adjust to fit Footer
     width: 60,
     height: 60,
     borderRadius: 30,

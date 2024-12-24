@@ -4,7 +4,7 @@ import { DataTable } from "react-native-paper";
 const API_URL = "http://192.168.0.6:8080/api/recipe";
 
 // Hàm gọi API GET để lấy tất cả các recipe
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzQ5NTQ1ODQsImV4cCI6MTczNTA0MDk4NH0.rJpLbh4hbUt5g5wRqQBYKVLimiqmublL-ypIQ5zg3hw`;
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUwNDc0NzMsImV4cCI6MTczNTEzMzg3M30.l8kLlTpFFtACXXeA6azw04YD_9LVfeWjOujzdRZrydc`;
 function getAllRecipes() {
   console.log(bearerAuth);
   return fetch(API_URL, {
@@ -103,5 +103,31 @@ function deleteRecipe(recipeId) {
     });
 }
 
+function getRecipeById(recipeId) {
+  fetch(`${API_URL}/${recipeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: bearerAuth,
+    },
+  })
+    .then((response) => {
+      if (response.ok) {
+        console.log(`Get recipe by id ${recipeId} successfully`);
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error get recipe: ", error);
+    });
+}
+
 // Expose các hàm để có thể sử dụng ở nơi khác
-export { getAllRecipes, createRecipe, updateRecipe, deleteRecipe };
+export {
+  getAllRecipes,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+  getRecipeById,
+};

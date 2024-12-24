@@ -7,7 +7,7 @@ import {
   Alert,
   Text,
 } from "react-native";
-import { createGroup } from "../controller/GroupController";
+import { createGroup } from "../../../controller/GroupController";
 
 const CreateGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState("");
@@ -25,9 +25,10 @@ const CreateGroupScreen = ({ navigation }) => {
         description: description,
       };
       await createGroup(groupData);
-      navigation.goBack();
+      navigation.goBack(); // Quay lại màn hình trước nếu tạo nhóm thành công
     } catch (error) {
       Alert.alert("Error", "Failed to create group");
+      console.log("Error detail: ", error);
     }
   };
 

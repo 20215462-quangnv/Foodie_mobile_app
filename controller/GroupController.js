@@ -1,12 +1,14 @@
 // Định nghĩa URL cơ bản của API
-const BASE_API_URL = "http://localhost:8080/api/user/group";
+const API_URL = "http://10.0.2.2:8080/api/user/group";
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUwNDc0NzMsImV4cCI6MTczNTEzMzg3M30.l8kLlTpFFtACXXeA6azw04YD_9LVfeWjOujzdRZrydc`;
 
-// Hàm gọi API PUT để tạo một nhóm mới
-function createGroup(groupData) {
-  return fetch(`${BASE_API_URL}`, {
+// Hàm gọi API PUT để update nhóm
+function updateGroup(groupData) {
+  return fetch(`${API_URL}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
     body: JSON.stringify(groupData),
   })
@@ -25,10 +27,11 @@ function createGroup(groupData) {
 
 // Hàm gọi API POST để thêm một thành viên vào nhóm
 function addMemberToGroup(groupId, userId) {
-  return fetch(`${BASE_API_URL}/${groupId}/members/${userId}`, {
+  return fetch(`${API_URL}/${groupId}/members/${userId}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -46,10 +49,11 @@ function addMemberToGroup(groupId, userId) {
 
 // Hàm gọi API DELETE để xóa một thành viên khỏi nhóm
 function removeMemberFromGroup(groupId, userId) {
-  return fetch(`${BASE_API_URL}/${groupId}/members/${userId}`, {
+  return fetch(`${API_URL}/${groupId}/members/${userId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -68,14 +72,17 @@ function removeMemberFromGroup(groupId, userId) {
 }
 
 // Hàm gọi API POST để tạo một nhóm cụ thể (ví dụ tạo nhóm nâng cao)
-function createSpecificGroup(groupData) {
-  return fetch(`${BASE_API_URL}/create`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(groupData),
-  })
+function createGroup(groupData) {
+  return fetch(
+    `${API_URL}/create?name=${groupData.name}&description=${groupData.description}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
+    }
+  )
     .then((response) => {
       if (response.ok) {
         return response.json();
@@ -91,10 +98,11 @@ function createSpecificGroup(groupData) {
 
 // Hàm gọi API GET để lấy thông tin một nhóm
 function getGroupById(groupId) {
-  return fetch(`${BASE_API_URL}/${groupId}`, {
+  return fetch(`${API_URL}/${groupId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -112,10 +120,11 @@ function getGroupById(groupId) {
 
 // Hàm gọi API DELETE để xóa một nhóm
 function deleteGroup(groupId) {
-  return fetch(`${BASE_API_URL}/${groupId}`, {
+  return fetch(`${API_URL}/${groupId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -133,10 +142,11 @@ function deleteGroup(groupId) {
 
 // Hàm gọi API GET để lấy danh sách tất cả thành viên trong nhóm
 function getGroupMembers(groupId) {
-  return fetch(`${BASE_API_URL}/${groupId}/members`, {
+  return fetch(`${API_URL}/${groupId}/members`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -157,10 +167,11 @@ function getGroupMembers(groupId) {
 
 // Hàm gọi API GET để lấy danh sách tất cả các nhóm
 function getAllGroups() {
-  return fetch(`${BASE_API_URL}/all`, {
+  return fetch(`${API_URL}/all`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: bearerAuth,
     },
   })
     .then((response) => {
@@ -181,7 +192,7 @@ export {
   createGroup,
   addMemberToGroup,
   removeMemberFromGroup,
-  createSpecificGroup,
+  updateGroup,
   getGroupById,
   deleteGroup,
   getGroupMembers,

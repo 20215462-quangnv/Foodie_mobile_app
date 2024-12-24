@@ -7,7 +7,7 @@ import HomeScreen from "./page/Home";
 import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
 import LoginScreen from "./page/Login";
-import CreateGroupScreen from "./page/CreateGroupScreen";
+import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
 import Footer from "./layout/Footer";
 import GroupScreen from "./page/GroupScreen";
 
