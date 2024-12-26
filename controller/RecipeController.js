@@ -1,10 +1,11 @@
 // Định nghĩa URL của API
 import Config from "react-native-config";
 import { DataTable } from "react-native-paper";
+
 const API_URL = "http://192.168.0.6:8080/api/recipe";
 
 // Hàm gọi API GET để lấy tất cả các recipe
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUwNDc0NzMsImV4cCI6MTczNTEzMzg3M30.l8kLlTpFFtACXXeA6azw04YD_9LVfeWjOujzdRZrydc`;
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUxMzg2NzIsImV4cCI6MTczNTIyNTA3Mn0.tMvFCShvU4NcOFcm65mazXoHMgUR6lYHumtJxaC3hRo`;
 function getAllRecipes() {
   console.log(bearerAuth);
   return fetch(API_URL, {
@@ -104,7 +105,7 @@ function deleteRecipe(recipeId) {
 }
 
 function getRecipeById(recipeId) {
-  fetch(`${API_URL}/${recipeId}`, {
+  return fetch(`${API_URL}/${recipeId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -113,13 +114,14 @@ function getRecipeById(recipeId) {
   })
     .then((response) => {
       if (response.ok) {
-        console.log(`Get recipe by id ${recipeId} successfully`);
+        return response.json();
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     })
     .catch((error) => {
-      console.error("Error get recipe: ", error);
+      console.error(`Error fetching recipe with ID ${recipeId}:`, error);
+      throw error;
     });
 }
 

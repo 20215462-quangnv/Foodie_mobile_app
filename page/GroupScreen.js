@@ -5,44 +5,48 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
 } from "react-native";
+import { getGroupById } from "../controller/GroupController";
+import { getRecipeById } from "../controller/RecipeController";
 
-// Mock API call to fetch a group
-const fetchGroupDetails = async (groupId) => {
-  const response = await fetch(`/api/group/${groupId}`);
-  const data = await response.json();
-  return data.data.groupRecipes; // Return groupRecipes
-};
+const GroupScreen = ({ route }) => {
+  const { groupId } = route.params; // Lấy groupId từ route.params
+  const [groupRecipes, setGroupRecipes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState([]);
 
-// Fetch recipe details by recipeId
-const fetchRecipeDetails = async (recipeId) => {
-  const response = await fetch(`/api/recipe/${recipeId}`);
-  const data = await response.json();
-  return data.data; // Return the recipe details
-};
-
-const GroupScreen = ({ groupId }) => {
-  const [groupRecipes, setGroupRecipes] = useState([]); // Group recipes data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [recipes, setRecipes] = useState([]); // Array of recipes to display
-
-  // Fetch group details and recipes
   useEffect(() => {
     const loadGroupData = async () => {
       setLoading(true);
       try {
-        // Fetch the group recipes first
-        const groupRecipes = await fetchGroupDetails(groupId);
-        // For each recipeId, fetch its details
+        const response = await getGroupById(groupId);
+        const groupRecipes = response.data.groupRecipes;
+        console.log("Fetched groupRecipes:", groupRecipes);
+
+        if (!groupRecipes) {
+          console.error("groupRecipes is undefined or null");
+          return; // Dừng việc thực thi nếu không có dữ liệu
+        }
+
+        if (!Array.isArray(groupRecipes)) {
+          console.error("groupRecipes is not an array:", groupRecipes);
+          return;
+        }
+
         const recipeDetailsPromises = groupRecipes.map(async (groupRecipe) => {
-          const recipeDetails = await fetchRecipeDetails(groupRecipe.recipeId);
+          console.log(
+            "Fetching recipe details for recipe:",
+            groupRecipe.recipeId
+          );
+          const response = getRecipeById(groupRecipe.recipeId);
+          const recipeDetails = response.data;
           return {
             ...recipeDetails,
-            timestamp: groupRecipe.timestamp,
           };
         });
+
         const allRecipes = await Promise.all(recipeDetailsPromises);
+        console.log("All recipes:", allRecipes);
         setRecipes(allRecipes);
       } catch (error) {
         console.error("Error fetching group or recipe data:", error);
@@ -53,37 +57,31 @@ const GroupScreen = ({ groupId }) => {
     loadGroupData();
   }, [groupId]);
 
-  // Render each recipe item as a bubble
-  const renderItem = ({ item }) => {
-    return (
-      <View style={styles.bubbleContainer}>
-        {/* Owner Avatar */}
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {item.owner?.fullName?.split(" ")[0]?.[0]?.toUpperCase()}
-          </Text>
-        </View>
-        {/* Recipe bubble */}
-        <View style={styles.bubble}>
-          <Text style={styles.recipeName}>{item.name}</Text>
-          <Text style={styles.recipeDescription}>{item.description}</Text>
-          <Text style={styles.timestamp}>
-            {new Date(item.timestamp).toLocaleString()}
-          </Text>
-        </View>
+  const renderItem = ({ item }) => (
+    <View style={styles.bubbleContainer}>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>
+          {item.author?.fullName?.split(" ")[0]?.[0]?.toUpperCase()}
+        </Text>
       </View>
-    );
-  };
+      <View style={styles.bubble}>
+        <Text style={styles.recipeName}>{item.name}</Text>
+        <Text style={styles.recipeDescription}>{item.description}</Text>
+        <Text style={styles.timestamp}>
+          {new Date(item.timestamp).toLocaleString()}
+        </Text>
+      </View>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* FlatList showing all recipes in the group */}
       <FlatList
         data={recipes}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         ListFooterComponent={loading && <ActivityIndicator />}
-        inverted // Show newest recipe at the bottom
+        inverted
       />
     </View>
   );

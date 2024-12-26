@@ -1,6 +1,6 @@
 // Định nghĩa URL cơ bản của API
 const API_URL = "http://10.0.2.2:8080/api/user/group";
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUwNDc0NzMsImV4cCI6MTczNTEzMzg3M30.l8kLlTpFFtACXXeA6azw04YD_9LVfeWjOujzdRZrydc`;
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUxMzg2NzIsImV4cCI6MTczNTIyNTA3Mn0.tMvFCShvU4NcOFcm65mazXoHMgUR6lYHumtJxaC3hRo`;
 
 // Hàm gọi API PUT để update nhóm
 function updateGroup(groupData) {

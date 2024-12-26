@@ -1,6 +1,6 @@
 const API_URL = "http://192.168.0.6:8080/api/user/profile";
 
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUwNDc0NzMsImV4cCI6MTczNTEzMzg3M30.l8kLlTpFFtACXXeA6azw04YD_9LVfeWjOujzdRZrydc`;
+const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUxMzg2NzIsImV4cCI6MTczNTIyNTA3Mn0.tMvFCShvU4NcOFcm65mazXoHMgUR6lYHumtJxaC3hRo`;
 function getUserProfile() {
   console.log(bearerAuth);
   return fetch(API_URL, {
