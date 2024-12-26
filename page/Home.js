@@ -12,44 +12,60 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Footer from '../layout/Footer';
 import { getFridgeGroup, getAllFridgeGroup } from "../controller/FridgeController";
 import { getAllRecipes } from "../controller/RecipeController";
+
 const HomeScreen = ({ navigation })=> {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [recipeItems, setRecipeItems] = useState([]);
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const data = await getAllRecipes();  // Chờ kết quả từ API
+      async function fetchData() {
+        // const token = getToken(); // Lấy token hiện tại
+        // if (!token) {
+        //     setError('Token not found. Please login.');
+        //     return;
+        // }
+        try {
+        const data = await getAllRecipes();  
         setRecipeItems(data.data.map(item => ({
             id: item.id,
             name: item.name,
             description: item.description,
             htmlContent: item.htmlContent,
-            authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
-            food: item.food,  // Truy cập vào 'food' và lấy 'type'
+            authorName: item.author.fullName, 
+            food: item.food, 
             createdAt: item.createdAt,
             updatedAt: item.updatedAt
-          })));  // Cập nhật state với dữ liệu nhận được
-        console.log(recipeItems);
+          })));  
       } catch (error) {
-        setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+        setError('Error fetching recipes');  
       }
     }
     
-    fetchData();  // Gọi hàm fetchData
-  }, []);  // Chạy chỉ một lần khi component mount 
+    fetchData();
+  }, []);  
   useEffect(() => {
         async function fetchData() {
           try {
             const data = await getAllFridgeGroup();  
-            setFridgeItems(data.data.map(item => ({
-                foodName : foodName,
-                quantity : quantity,
-                useWithin : useWithin,
-                note : note,
-                foodId : foodId,
-                ownerId : ownerId,
-              })));  
-            console.log(data);
+            setFridgeItems(data
+            .filter(item => item.data && item.data.length > 0)  // Loại bỏ các item không thỏa mãn điều kiện
+            .map(item => {
+                console.log(item.data.length);
+                console.log(item.data[0].food);
+                console.log(new Date(item.data[0].expiredDate));
+                return item.data.map(subItem => ({
+                    foodName: subItem.foodName,
+                    quantity: subItem.quantity,
+                    useWithin: subItem.useWithin,
+                    note: subItem.note,
+                    foodId: subItem.foodId,
+                    ownerId: subItem.ownerId,
+                    expiredDate: new Date(subItem.expiredDate),
+                    food: subItem.food,
+                }));
+            })
+            .flat()
+            );
+
           } catch (error) {
             setError('Error fetching fridge');  
           }
@@ -58,6 +74,19 @@ const HomeScreen = ({ navigation })=> {
         fetchData(); 
   }, []);
 
+
+  const checkExpired = (expiredDate) => {
+    const today = new Date();
+    const expirationDate = new Date(expiredDate);
+
+    today.setHours(0, 0, 0, 0);
+    expirationDate.setHours(0, 0, 0, 0);
+
+    const timeDifference = expirationDate - today;
+    const daysLeft = timeDifference / (1000 * 3600 * 24);
+
+    return daysLeft;
+};
 
 
 
@@ -88,19 +117,6 @@ const HomeScreen = ({ navigation })=> {
 
         {/* Body */}
         <View style={styles.body}>
-            <View style={styles.searchbarContainer}>
-                <View style={styles.searchBar}>
-
-                    <TouchableOpacity style={styles.searchButton}>
-                        <Icon name="search" size={20} color="black" />
-                    </TouchableOpacity>
-                    <TextInput
-                        style={styles.inputSearch}
-                        placeholder="Search..."
-                    />
-                </View>
-            </View>
-
             <View style={styles.mainBody}>
                 <View style={styles.listNote}>
 
@@ -141,28 +157,42 @@ const HomeScreen = ({ navigation })=> {
                 <ScrollView style={styles.scrollViewWarning}>
                     
                         <View style={styles.itemHolder}>
-                        {fridgeItems.map((item, index) => (
-                            <View key={index} style={styles.itemContainer}>
-                                <View style={styles.leftItem}> 
-                                    <Image
-                                        source={{
-                                            uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/640px-Good_Food_Display_-_NCI_Visuals_Online.jpg",
-                                        }}
-                                        style={styles.imageWarning}
-                                        onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
-                                    />
-                                    <Text style={styles.itemText}>{item}</Text>
-                                </View>
+                              {fridgeItems.map((item, index) => {
+                                  
+                               const daysLeft = checkExpired(item.expiredDate);
+                               
+                                if (daysLeft > 2) {
+                                    return null;
+                                }
 
-                                <View style={styles.rightItem}>
-                                    <Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>
-                                    {/*<Text style={styles.textOrange}>SẮP HẾT HẠN</Text>*/}
-                                    <Text style={styles.normalText}>Số lượng: 10</Text>
-                                    <Text style={styles.normalText}>Hết hạn: {item}</Text>
-                                </View>
-                                
-                            </View>
-                        ))}
+                                return (
+                                    <View key={index} style={styles.itemContainer}>
+                                        <View style={styles.leftItem}> 
+                                            <Image
+                                                source={{
+                                                    uri: item.food.imageUrl
+                                                }}
+                                                style={styles.imageWarning}
+                                                onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
+                                            />
+                                            <Text style={styles.itemText}>{item.foodName}</Text>
+                                        </View>
+
+                                        <View style={styles.rightItem}>
+                                            {daysLeft < 0 && 
+                                                (<Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>)
+                                            }
+                                             {daysLeft >= 0 && 
+                                                <Text style={styles.textOrange}>SẮP HẾT HẠN</Text>
+                                            }
+                                            
+                                            <Text style={styles.normalText}>Số lượng: {item.quantity}</Text>
+                                            <Text style={styles.normalText}>Hết hạn: {item.expiredDate.getDate()}-{item.expiredDate.getMonth()+1}-{item.expiredDate.getFullYear()}</Text>
+                                        </View>
+                                        
+                                    </View>
+
+                                )})}
                         </View>
                     
                 </ScrollView>
@@ -265,7 +295,8 @@ const styles = StyleSheet.create({
  /*search bar end*/
 
   /*mainbody begin*/
-        mainBody: {
+    mainBody: {
+            marginTop: 20,
             flex: 11,
             width: "100%", 
         },
@@ -335,7 +366,8 @@ const styles = StyleSheet.create({
             },
             itemContainer: {
                 //flex:1,
-                width: '47%', 
+                width: '100%',
+                height: 120,
                 marginBottom: 10,
                 padding: 5, 
                 borderRadius: 5, 
@@ -353,7 +385,7 @@ const styles = StyleSheet.create({
 
             },
             imageWarning: {
-                height: 70,
+                height: 80,
                 resizeMode: 'cover',
                 borderWidth: 1,
                 borderColor: "#000", 
@@ -365,7 +397,7 @@ const styles = StyleSheet.create({
                 fontSize: 16,
             },
             leftItem: {
-                flex: 2,
+                flex: 3,
                 overflow: 'hidden',
                 flexDirection: "column",
             },

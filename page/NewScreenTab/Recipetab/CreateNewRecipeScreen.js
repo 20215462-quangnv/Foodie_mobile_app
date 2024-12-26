@@ -13,23 +13,6 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 const CreateNewReCipeScreen = (()=> {
-    // id: item.id,
-    // name: item.name,
-    // description: item.description,
-    // authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
-    // foodType: item.food.type,  // Truy cập vào 'food' và lấy 'type'
-    // createdAt: item.createdAt,
-    // updatedAt: item.updatedAt
-    const [addingItem, setAddingItem] = useState({});
-    const handleSave = () => {
-        setItems((prevItems) =>
-            prevItems.map((item) =>
-                item.id === editedItem.id ? { ...item, ...editedItem } : item
-            )
-        );
-        setModalVisible(false);
-    };
-    
     return (
         <View
         animationType="slide"
