@@ -1,30 +1,28 @@
-// Định nghĩa URL của API
-import Config from 'react-native-config';
+import { getToken } from "../controller/AuthController";
 import { getUserProfile } from './UserController';
 const API_URL = 'http://192.168.0.6:8080/api/fridge';
 
-// Hàm gọi API GET để lấy tất cả các recipe
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzQ5NTQ1ODQsImV4cCI6MTczNTA0MDk4NH0.rJpLbh4hbUt5g5wRqQBYKVLimiqmublL-ypIQ5zg3hw`;
-// Hàm gửi yêu cầu GET với groupId
-
-
+const getBearerAuth = async () => {
+  const token = await getToken();
+  return `Bearer ${token}`;
+};
 
 async function getFridgeGroup(groupId) {
-    const groupUrl = `${API_URL}/group/${groupId}`;  // Tạo URL cho groupId cụ thể
+    const groupUrl = `${API_URL}/group/${groupId}`;
   
     try {
+      const bearerAuth = await getBearerAuth();
       const response = await fetch(groupUrl, {
         method: 'GET',  
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': bearerAuth
+          'Authorization': bearerAuth,
         },
       });
   
       if (response.ok) {
-        
         const data = await response.json();  
-        console.log(data);
+        console.log("fridge: " + data);
         return data;  
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -32,20 +30,22 @@ async function getFridgeGroup(groupId) {
     } catch (error) {
       console.error('Error fetching fridge group:', error);  
     }
-  }
+}
   
-  async function getAllFridgeGroup() {
+async function getAllFridgeGroup() {
     try {
+        const bearerAuth = await getBearerAuth();
         const userProfile = await getUserProfile();
-        console.log(userProfile);
-        const groupIds = userProfile.data.groupIds;  // Lấy danh sách groupIds từ user profile
-        console.log(groupIds); 
+        const groupIds = userProfile.data.groupIds; 
+      console.log(groupIds);
         const allGroups = await Promise.all(
-            groupIds.map(groupId => getFridgeGroup(groupId).data)
+            groupIds.map(groupId => 
+                getFridgeGroup(groupId, bearerAuth)
+            )
         );
-
-        console.log("all "+ allGroups);  // Tổng hợp dữ liệu từ tất cả groupIds
-        return allGroups;
+        console.log("allGroupFridge "+allGroups);
+      return allGroups;
+      
     } catch (error) {
         console.error('Error fetching all fridge groups:', error);
         throw error;

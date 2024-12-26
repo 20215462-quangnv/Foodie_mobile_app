@@ -11,28 +11,66 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import DateTimePicker from "@react-native-community/datetimepicker";
-import Footer from '../layout/Footer';
 import { getAllRecipes, createRecipe, deleteRecipe } from '../controller/RecipeController';
 import { getUserProfile } from "../controller/UserController.js";
-import EditRecipeScreen from './NewScreenTab/Recipetab/EditRecipeScreen.js';
-
+import { colors } from "./styles/RootStyle.js";
+import { getAllFoodByGroup } from "../controller/FoodController.js";
 
 const RecipeScreen = ({ navigation }) => {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [addItemModalVisible, setAddItemModalVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedFilter, setSelectedFilter] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [addingItem, setAddingItem] = useState({});
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [isSelectionMode, setIsSelectionMode] = useState(false); 
+    const [selectedItems, setSelectedItems] = useState(null);
+    const [showFoodSelectModal, setShowFoodSelectModal] = useState(false);
+    //Get User Profile
     const [user, setUser] = useState(null);
     useEffect(() => {
         async function fetchData() {
           try {
-            const data = await getUserProfile();  // Chờ kết quả từ API
+            const data = await getUserProfile();  
             setUser(data.data)
-            console.log(data);
           } catch (error) {
-            setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+            setError('Error fetching recipes');
           }
+        } 
+        fetchData();  
+    }, []); 
+    const [listFood, setListFood] = useState([]);
+    useEffect(() => {
+      async function fetchData() {
+        try {
+          const data = await getAllFoodByGroup(); 
+          setListFood(data
+            .filter(item => item.data && item.data.length > 0)
+            .map(item => {
+                console.log("item   " + item.data[0].name);
+              return item.data.map(subItem => ({
+                id: subItem.id,
+                name: subItem.name,
+                type: subItem.type,
+                description: subItem.description,
+                imageUrl: subItem.imageUrl,
+                measureUnit: subItem.measureUnit,
+                foodCategory: subItem.foodCategory.name,
+              }))
+             
+            })
+            .flat()
+          ); 
+        } catch (error) {
+          setError('Error fetching recipes');  
         }
-        
-        fetchData();  // Gọi hàm fetchData
-      }, []);  // Chạy chỉ một lần khi component mount
+      }
+      
+      fetchData(); 
+    }, []); 
+    //Get Recipes
     const [items, setItems] = useState([]);
     useEffect(() => {
         async function fetchData() {
@@ -43,127 +81,94 @@ const RecipeScreen = ({ navigation }) => {
                 name: item.name,
                 description: item.description,
                 htmlContent: item.htmlContent,
-                authorId: item.author.id,
-                authorName: item.author.fullName,  // Truy cập vào 'author' và lấy 'name'
-                food: item.food,  // Truy cập vào 'food' và lấy 'type'
+                author: item.author,
+                food: item.food,  
                 createdAt: item.createdAt,
                 updatedAt: item.updatedAt
-              })));  // Cập nhật state với dữ liệu nhận được
-            console.log(data);
+              })));  
           } catch (error) {
-            setError('Error fetching recipes');  // Cập nhật lỗi nếu có
+            setError('Error fetching recipes');  
           }
         }
         
-        fetchData();  // Gọi hàm fetchData
-      }, []);  // Chạy chỉ một lần khi component mount 
-
-    const [modalVisible, setModalVisible] = useState(false);
-    const [filterModalVisible, setFilterModalVisible] = useState(false);
-    const [addItemModalVisible, setAddItemModalVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [editedItem, setEditedItem] = useState({});
-    const [selectedFilter, setSelectedFilter] = useState(null);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [addingItem, setAddingItem] = useState({});
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [isSelectionMode, setIsSelectionMode] = useState(false); 
-    const [selectedItems, setSelectedItems] = useState(null);
-    const onDateChange = (event, selectedDate) => {
-      const currentDate = selectedDate || editedItem.date;
-      setShowDatePicker(Platform.OS === "ios" ? true : false);
-      setEditedItem({ ...editedItem, date: currentDate });
-    };
-    
-
-    const openModal = (item) => {
-        setSelectedItem(item);
-        setEditedItem(item); 
-        setModalVisible(true);
-    };
+        fetchData();  
+    }, []);  
     const openFilterModal = () => {
         setFilterModalVisible(true);
     };
 
     const openAddItemModal = () => {
-      
         setAddItemModalVisible(true);
+        setAddingItem({});
     };
-    // const handleSave = () => {
-    //     setItems((prevItems) =>
-    //         prevItems.map((item) =>
-    //             item.id === editedItem.id ? { ...item, ...editedItem } : item
-    //         )
-    //     );
-    //     setModalVisible(false);
-    // };
-    const handleSaveAddedItem = () => {
-        setAddingItem(null);
-        const newItem = {
+    const handleChooseFood = (food) => {
+        setAddingItem({ ...addingItem, food: food })
+    }
 
+    const handleSaveAddedItem = () => {
+        // setAddingItem(null);
+        
+        const newItem = {
             name: addingItem.name,
             description: addingItem.description,
-            foodId: 2,  // Truy cập vào 'food' và lấy 'type'
+            htmlContent: addingItem.content,
+            foodId: addingItem.food.id,  
             authorId: user.id,  
         };
         createRecipe(newItem)
         .then((createdRecipe) => {
-          // Nếu thành công, thêm công thức mới vào danh sách
-          setItems((prevItems) => [...prevItems, createdRecipe]);
-          setAddItemModalVisible(false);
-          setAddingItem(null);
-          console.log('Item successfully added:', createdRecipe);
+            setItems((prevItems) => [...prevItems, createdRecipe]);
+            setShowFoodSelectModal(false);
+            setAddItemModalVisible(false);
+          
+            console.log('Item successfully added:', createdRecipe);
+            
+          
         })
         .catch((error) => {
-          // Nếu thất bại, log lỗi và hiển thị thông báo
           console.error('Failed to create recipe:', error);
         });
-        //setItems((prevItems) => [...prevItems, newItem]);
-        //setAddItemModalVisible(false); 
     };
     
     const applyFilter = () => {
-        // Apply multiple filters from the selectedFilters array
-        console.log("Selected Filters:", selectedFilter);
-         // Get the filtered list of items based on selected filters
         const filteredItemsList = filteredItems();
-
-        // Update the state with the filtered list of items
         setItems(filteredItemsList);
         setFilterModalVisible(false);
     };
     const handleLongPress = (item) => {
-        setIsSelectionMode(true); // Bật chế độ chọn
-        setSelectedItems([item.id]); // Bắt đầu với item được nhấn giữ
+        setIsSelectionMode(true); 
+        setSelectedItems([item.id]); 
     };
     const handlePress = (item) => {
         if (isSelectionMode) {
-            toggleSelectItem(item.id); // Chọn/bỏ chọn nếu đang ở chế độ chọn
+            toggleSelectItem(item.id); 
         } else {
-            setEditedItem(item)
-            setModalVisible(true); // Thực hiện hành động khi nhấn
+            console.log(item);
+            handleShowEditRecipe(item);
         }
     };
-
+    const handleShowEditRecipe = (item) => {
+        navigation.navigate('EditRecipe', {editedItem : item, listFood: listFood});
+    };
     const toggleSelectItem = (itemId) => {
         setSelectedItems((prevSelected) => {
         if (prevSelected.includes(itemId)) {
-            return prevSelected.filter((id) => id !== itemId); // Bỏ chọn nếu đã chọn
+            return prevSelected.filter((id) => id !== itemId); 
         } else {
-            return [...prevSelected, itemId]; // Thêm vào danh sách đã chọn
+            return [...prevSelected, itemId]; 
         }
         });
     };
     const selectAllItems = () => {
         if (selectedItems.length === items.length) {
-            setSelectedItems([]); // Nếu tất cả đã chọn, thì bỏ chọn
+            setSelectedItems([]);
         } else {
-            setSelectedItems(items.map(item => item.id)); // Chọn tất cả item
+            setSelectedItems(items.map(item => item.id)); 
         }
     };
     const cancelSelection = () => {
         setIsSelectionMode(false);
-        setSelectedItems([]); // Dọn dẹp các item đã chọn
+        setSelectedItems([]);
     };
 
     const handleDeleteSelectedItems = () => {
@@ -172,11 +177,8 @@ const RecipeScreen = ({ navigation }) => {
             selectedItems.map(item => deleteRecipe(item))
           )
           .then(() => {
-            // Cập nhật lại danh sách items sau khi xóa
             const newItems = items.filter(item => !selectedItems.includes(item.id));
             setItems(newItems); 
-        
-            // Hủy chế độ chọn sau khi xóa
             cancelSelection(); 
             console.log('Selected items deleted successfully');
           })
@@ -186,13 +188,15 @@ const RecipeScreen = ({ navigation }) => {
     };
 
 
-    // Filter logic for sorting and filtering items based on multiple filters
+  const handleShowChooseFood = () => {
+    if (showFoodSelectModal) {
+      setShowFoodSelectModal(false);
+    }
+    else setShowFoodSelectModal(true);
+  }
+   
     const filteredItems = () => {
-        let result = [...items]; // Assuming items is your original list
-
-// Assuming selectedFilter is the current selected filter
-        // Example selected filter, could come from your state
-
+        let result = [...items];
         switch (selectedFilter) {
             case 'quantity_desc':
                 result = filteredItems.sort((a, b) => b.quantity - a.quantity);
@@ -212,16 +216,15 @@ const RecipeScreen = ({ navigation }) => {
             default:
                 break;
         }
-
-        //console.log(filteredItems);
-
         if (searchQuery.trim()) {
             result = filteredItems.filter(item =>
                 item.name.toLowerCase().includes(searchQuery.toLowerCase())
             );
+            
         }
         return result;
     };
+
 
     return (
         <View style={styles.container}>
@@ -256,24 +259,18 @@ const RecipeScreen = ({ navigation }) => {
                 <View style={styles.mainBody}>
                     <View style={styles.bodyHeader}>
                         <Text style={styles.headerText}>DANH SÁCH CÔNG THỨC</Text>
-                    </View>
-                    <View style={styles.listFood}>
-                        <ScrollView style={styles.scrollViewListFood}>
-                            <View style={styles.itemHolder}>
-                                {isSelectionMode && (
+                         {isSelectionMode && (
                                     <View style={styles.cancelButtonContainer}>
-                                        
-                                        
                                         <TouchableOpacity
                                             style={styles.selectAllContainer}
                                             onPress={selectAllItems}
                                         >
-                                            <MaterialCommunityIcons
-                                                name={selectedItems.length === items.length ? 'checkbox-marked' : 'checkbox-blank-outline'}
-                                                size={24}
-                                                color="black"
-                                            />
-                                            <Text style={styles.selectAllText}>All</Text>
+                                        <MaterialCommunityIcons
+                                            name={selectedItems.length === items.length ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                                            size={24}
+                                            color="black"
+                                        />
+                                        <Text style={styles.selectAllText}>All</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity onPress={handleDeleteSelectedItems} style={styles.deleteButton}>
                                             <Text style={styles.deleteButtonText}>Delete Selected Items</Text>
@@ -283,6 +280,11 @@ const RecipeScreen = ({ navigation }) => {
                                         </TouchableOpacity>
                                     </View>
                                 )}
+                    </View>
+                    <View style={styles.listFood}>
+                        <ScrollView style={styles.scrollViewListFood}>
+                            <View style={styles.itemHolder}>
+                               
                                 {filteredItems().map((item, index) => (
                                     <TouchableOpacity 
                                         key={index} 
@@ -296,11 +298,11 @@ const RecipeScreen = ({ navigation }) => {
                                                     style={styles.checkboxContainer}
                                                     onPress={() => toggleSelectItem(item.id)}
                                                 >
-                                                    <MaterialCommunityIcons
-                                                        name={selectedItems.includes(item.id) ? 'checkbox-marked' : 'checkbox-blank-outline'}
-                                                        size={24}
-                                                        color="black"
-                                                    />
+                                                <MaterialCommunityIcons
+                                                    name={selectedItems.includes(item.id) ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                                                    size={24}
+                                                    color="black"
+                                                />
                                                 </TouchableOpacity>
                                             )}
                                             <Image
@@ -312,15 +314,13 @@ const RecipeScreen = ({ navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            {/* <Text style={styles.textRed}>{item.name}</Text> */}
                                             <Text style={styles.textRed}>Món ăn: {item.food.name}</Text>
                                             <Text style={styles.normalText}>Mô tả: {item.description}</Text>
-                                            <Text style={styles.normalText}>Tạo bởi: {item.authorName}</Text>
+                                            <Text style={styles.normalText}>Tạo bởi: {item.author.fullName}</Text>
                                             <Text style={styles.normalText}>Created at: {new Date(item.createdAt).toDateString()}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}
-                                
                             </View>
                         </ScrollView>
                     </View>
@@ -328,40 +328,19 @@ const RecipeScreen = ({ navigation }) => {
                         style={styles.addButton} 
                         onPress= {openAddItemModal}
                     >
-                        <Icon name="plus-circle" size={48} color="#4EA72E" />
-                        
+                        <Icon name="plus-circle" size={48} color="#4EA72E" />   
                     </TouchableOpacity>
                 </View>
             </View>
-
-            {/* Popup Modal */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <View style={styles.modalBackground}>
-                    <View style={styles.modalContainer}>
-                    <EditRecipeScreen 
-                        setItems={setItems}
-                        editedItem={editedItem} 
-                        setEditedItem={setEditedItem} 
-                        listFood={editedItem.food} 
-                        setModalVisible={setModalVisible}
-                    />
-                </View>
-                </View>
-            </Modal>
              {/* Add new Item Modal */}
              <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={addItemModalVisible}
                 onRequestClose={() => setAddItemModalVisible(false)}
             >
                     <View style={styles.modalBackground}>
-                        <View style={styles.modalContainer}>
+                        <ScrollView style={styles.modalContainer}>
                             <Text style={styles.modalTitle}>Add Item</Text>
                             <TextInput
                                 style={styles.modalInput}
@@ -377,23 +356,61 @@ const RecipeScreen = ({ navigation }) => {
                                
                             />
                             <TextInput
-                                style={styles.modalInput}
-                               
+                                style={styles.modalInputContent}
+                                multiline={true}
                                 onChangeText={(text) => setAddingItem({ ...addingItem, content: text })}
                                 placeholder="Recipe Content"
                                
-                            />
+                        />
+                        {addingItem.food &&
+                            <View style={styles.foodSelectItem}>
+                                <Image source={{ uri: addingItem.food.imageUrl }} style={styles.foodImage} />
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Text>{addingItem.food.name}</Text>
+                                    <Text >({addingItem.food.type})</Text>
+                                </View>
+                            </View>
+                        }
                            
+                            <TouchableOpacity
+                                style={styles.addFoodButton}
+                                onPress={handleShowChooseFood}
+                            >
+                                <Text>Choose Food</Text>
+                            </TouchableOpacity>
+                           {showFoodSelectModal && (
+                            <View style={styles.foodSelectModal}>
+                                <Text style={styles.foodSelectTitle}>Select a Food</Text>
+                                {listFood.map((food) => (
+                                <TouchableOpacity
+                                    key={food.id}
+                                    style={styles.foodSelectItem}
+                                    onPress={() => {
+                                    handleChooseFood(food);
+                                    setShowFoodSelectModal(false); // Đóng modal khi chọn món ăn
+                                    }}
+                                >
+                                    <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                        <Text>{food.name}</Text>
+                                        <Text >({food.type})</Text>
+                                    </View>
+                                </TouchableOpacity>
+                                ))}
+                            </View>
+                            )}
                             <View style={styles.buttonHolder}>
                                 <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
                                     <Text style={styles.saveButtonText}>Save</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.cancelButton} onPress={() => setAddItemModalVisible(false)}>
+                            <TouchableOpacity style={styles.cancelButton} onPress={() => { setAddItemModalVisible(false); setShowFoodSelectModal(false) }}>
                                     <Text style={styles.cancelButtonText}>Cancel</Text>
                                 </TouchableOpacity>
                             </View>
+                        
                             
-                        </View>
+                    </ScrollView>
+                    
                     </View>
             </Modal>
             {/* Filter Modal */}
@@ -505,17 +522,21 @@ const styles = StyleSheet.create({
     },
     normalText: {
         fontSize: 16,
+        fontFamily: colors.fontFamily,
     },
     container: {
         flex: 1, 
+        backgroundColor: colors.background,
     },
     header: {
-        flex: 1, 
+        flex: 2.5, 
         backgroundColor: "#4EA72E", 
         paddingBottom: 10,
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'space-between',
+        margin: 10,
+        borderRadius: 6,
     },
     title: {
         flex: 4,
@@ -529,7 +550,7 @@ const styles = StyleSheet.create({
     },
     body: {
         flex: 7.5, 
-        backgroundColor: "#fff",
+        backgroundColor: colors.background,
         justifyContent: "center", 
         alignItems: "center", 
     },
@@ -583,26 +604,26 @@ const styles = StyleSheet.create({
     },
     itemContainer: {
         width: '100%', 
-        marginBottom: 10,
+        marginBottom: 15,
         padding: 5, 
-        borderRadius: 5, 
+        borderRadius: 6, 
         overflow: 'hidden',
         backgroundColor: '#fff', 
         shadowColor: '#000',
         flexDirection: 'row',
         shadowOffset: {
-            width: 0,
-            height: 2,
+            width: 2,
+            height: 4,
         },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.4,
         shadowRadius: 2,
-        elevation: 1, 
+        elevation: 3, 
     },
     imageWarning: {
         height: 80,
         resizeMode: 'cover',
-        borderWidth: 1,
-        borderColor: "#000", 
+        // borderWidth: 1,
+        // borderColor: "#000", 
     },
     itemText: {
         textAlign: 'center',
@@ -676,10 +697,12 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     modalContainer: {
+        flex: 1,
         backgroundColor: "#fff",
         padding: 20,
         borderRadius: 10,
-        width: 300,
+        width: 360,
+        margin: 50,
     },
     modalTitle: {
         fontSize: 18,
@@ -693,9 +716,27 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderRadius: 5,
     },
+    modalInputContent: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        marginBottom: 10,
+        borderRadius: 5,
+        flex: 1,
+    },
     buttonHolder: {
+        marginTop: 'auto',
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    addFoodButton: {
+        marginTop: 48,
+        marginBottom: 12,
+        padding: 10,
+        backgroundColor: "#4CAF50",
+        borderRadius: 5,
+        alignItems: 'center',
+        textAlign: 'center',
     },
     saveButton: {
         backgroundColor: "#4EA72E",
@@ -752,6 +793,30 @@ const styles = StyleSheet.create({
     selectedOption: {
         backgroundColor: 'orange',  // Visual highlight when selected
         borderColor: 'orange',
+    },
+     foodSelectModal: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        elevation: 5,
+        padding: 10,
+        marginBottom: 50,
+    },
+    foodSelectTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    foodSelectItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+     foodImage: {
+        width: 75,
+        height: 75,
+        borderRadius: 8,
+        marginRight: 10,
+        resizeMode: 'cover',
     },
 });
 

@@ -1,116 +1,113 @@
-// Định nghĩa URL của API
-import Config from 'react-native-config';
-import { DataTable } from 'react-native-paper';
+import { getToken, setToken } from "../controller/AuthController";
 const API_URL = 'http://192.168.0.6:8080/api/recipe';
 
-// Hàm gọi API GET để lấy tất cả các recipe
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzQ5NTQ1ODQsImV4cCI6MTczNTA0MDk4NH0.rJpLbh4hbUt5g5wRqQBYKVLimiqmublL-ypIQ5zg3hw`;
+// Hàm để lấy Bearer token
+const getBearerAuth = async () => {
+  const token = await getToken();  // Lấy token từ AsyncStorage
+  return `Bearer ${token}`;  // Trả về chuỗi Bearer token
+};
+
 function getAllRecipes() {
-  console.log(bearerAuth);
-  return fetch(API_URL, {
-    method: 'GET',  // Phương thức GET
-    headers: {
-      'Content-Type': 'application/json',
-      // Nếu cần thêm token xác thực, có thể thêm vào header
-      // 'Authorization': `Bearer ${token}`,
-      'Authorization': bearerAuth
-      }
-  })
+  return getBearerAuth().then(bearerAuth => {
+
+    return fetch(API_URL, {
+      method: 'GET',  
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,
+      },
+    })
     .then(response => {
       if (response.ok) {
-        //console.log(response.json());
-        return response.json();  // Nếu mã phản hồi là 200, chuyển đổi phản hồi thành JSON
+        return response.json(); 
       } else {
-        throw new Error(`HTTP error! status: ${response.status}`);  // Nếu mã phản hồi không phải 200, ném lỗi
+        throw new Error(`HTTP error! status: ${response.status}`);  
       }
     })
     .catch(error => {
-      console.error('Error fetching recipes:', error);  // Xử lý lỗi
-      throw error;  // Ném lỗi ra ngoài để frontend có thể xử lý
+      console.error('Error fetching recipes:', error);  
+      throw error;  
     });
+  });
 }
 
-// Hàm gọi API POST để tạo một recipe mới
 function createRecipe(newRecipe) {
-  fetch(API_URL, {
-    method: 'POST',  // Phương thức POST
-    headers: {
-      'Content-Type': 'application/json',
-      // Nếu cần thêm token xác thực, có thể thêm vào header
-      // 'Authorization': `Bearer ${token}`,
-      'Authorization': bearerAuth      
-    },
-    body: JSON.stringify(newRecipe),  // Dữ liệu sẽ được gửi đi dưới dạng JSON
-  })
+  return getBearerAuth().then(bearerAuth => {
+    return fetch(API_URL, {
+      method: 'POST',  
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,      
+      },
+      body: JSON.stringify(newRecipe),  
+    })
     .then(response => {
       if (response.ok) {
-        return response.json();  // Chuyển phản hồi thành JSON
+        return response.json();  
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     })
     .then(data => {
-      console.log('Recipe created:', data);  // Xử lý dữ liệu trả về
+      console.log('Recipe created:', data);  
       return data.data;
     })
     .catch(error => {
-      console.error('Error creating recipe:', error);  // Xử lý lỗi
+      console.error('Error creating recipe:', error);  
     });
+  });
 }
 
-// Hàm gọi API PUT để cập nhật một recipe
 function updateRecipe(recipeId, updatedRecipe) {
   console.log('Id   :', recipeId); 
-  return fetch(`${API_URL}/${recipeId}`, {
-    method: 'PUT',  // Phương thức PUT
-    headers: {
-      'Content-Type': 'application/json',
-      // Nếu cần thêm token xác thực, có thể thêm vào header
-      // 'Authorization': `Bearer ${token}`,
-      'Authorization': bearerAuth      
-    },
-    body: JSON.stringify(updatedRecipe),  // Dữ liệu sẽ được gửi đi dưới dạng JSON
-  })
+  return getBearerAuth().then(bearerAuth => {
+    return fetch(`${API_URL}/${recipeId}`, {
+      method: 'PUT',  
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,      
+      },
+      body: JSON.stringify(updatedRecipe),  
+    })
     .then(response => {
       if (response.ok) {
         console.log(response);
-        return response.json();  // Chuyển phản hồi thành JSON
+        return response.json();  
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     })
     .then(data => {
-      console.log('Recipe updated:', data);  // Xử lý dữ liệu trả về
+      console.log('Recipe updated:', data);  
       return data.data;
     })
     .catch(error => {
-      console.error('Error updating recipe:', error);  // Xử lý lỗi
+      console.error('Error updating recipe:', error); 
     });
+  });
 }
 
-// Hàm gọi API DELETE để xóa một recipe
 function deleteRecipe(recipeId) {
   console.log("recipeId "+ recipeId);
-  return fetch(`${API_URL}/${recipeId}`, {
-    method: 'DELETE',  // Phương thức DELETE
-    headers: {
-      'Content-Type': 'application/json',
-      // Nếu cần thêm token xác thực, có thể thêm vào header
-      // 'Authorization': `Bearer ${token}`,
-      'Authorization': bearerAuth      
-    },
-  })
+  return getBearerAuth().then(bearerAuth => {
+    return fetch(`${API_URL}/${recipeId}`, {
+      method: 'DELETE',  
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,      
+      },
+    })
     .then(response => {
       if (response.ok) {
-        console.log('Recipe deleted successfully');  // Xử lý nếu xóa thành công
+        console.log('Recipe deleted successfully'); 
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     })
     .catch(error => {
-      console.error('Error deleting recipe:', error);  // Xử lý lỗi
+      console.error('Error deleting recipe:', error);  
     });
+  });
 }
 
-// Expose các hàm để có thể sử dụng ở nơi khác
 export { getAllRecipes, createRecipe, updateRecipe, deleteRecipe };

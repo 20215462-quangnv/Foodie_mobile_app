@@ -22,22 +22,34 @@ const StoreScreen = ({ navigation }) => {
         async function fetchData() {
           try {
             const data = await getAllFridgeGroup();  
-            setItems(data.data.map(item => ({
-                foodName : foodName,
-                quantity : quantity,
-                useWithin : useWithin,
-                note : note,
-                foodId : foodId,
-                ownerId : ownerId,
-              })));  
-            console.log(data);
+            setItems(data
+            .filter(item => item.data && item.data.length > 0)  // Loại bỏ các item không thỏa mãn điều kiện
+            .map(item => {
+                console.log(item.data.length);
+                console.log(item.data[0].food);
+                console.log(new Date(item.data[0].expiredDate));
+                return item.data.map(subItem => ({
+                    foodName: subItem.foodName,
+                    quantity: subItem.quantity,
+                    useWithin: subItem.useWithin,
+                    note: subItem.note,
+                    foodId: subItem.foodId,
+                    ownerId: subItem.ownerId,
+                    expiredDate: new Date(subItem.expiredDate),
+                    food: subItem.food,
+                }));
+            })
+            .flat()
+            );
+
           } catch (error) {
             setError('Error fetching fridge');  
           }
         }
         
         fetchData(); 
-      }, []);
+  }, []);
+
 
     // Popup state
     const [modalVisible, setModalVisible] = useState(false);
@@ -261,17 +273,17 @@ const StoreScreen = ({ navigation }) => {
                                                 </TouchableOpacity>
                                             )}
                                             <Image
-                                                source={{ uri: item.image }}
+                                                source={{ uri: item.food.imageUrl }}
                                                 style={styles.imageWarning}
                                                 onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                             />
-                                            <Text style={styles.itemText}>{item.name}</Text>
+                                            <Text style={styles.itemText}>{item.foodName}</Text>
                                         </View>
 
                                         <View style={styles.rightItem}>
                                             <Text style={styles.textRed}>{item.state}</Text>
                                             <Text style={styles.normalText}>Số lượng: {item.quantity}</Text>
-                                            <Text style={styles.normalText}>Hết hạn: {new Date(item.date).toDateString()}</Text>
+                                            <Text style={styles.normalText}>Hết hạn: {item.expiredDate.getDate()}-{item.expiredDate.getMonth()+1}-{item.expiredDate.getFullYear()}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -291,7 +303,7 @@ const StoreScreen = ({ navigation }) => {
 
             {/* Popup Modal */}
             <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
@@ -354,7 +366,7 @@ const StoreScreen = ({ navigation }) => {
             </Modal>
              {/* Add new Item Modal */}
              <Modal
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 visible={addItemModalVisible}
                 onRequestClose={() => setAddItemModalVisible(false)}
@@ -601,26 +613,24 @@ const styles = StyleSheet.create({
     },
     itemContainer: {
         width: '100%', 
-        marginBottom: 10,
+        marginBottom: 15,
         padding: 5, 
-        borderRadius: 5, 
+        borderRadius: 6, 
         overflow: 'hidden',
         backgroundColor: '#fff', 
         shadowColor: '#000',
         flexDirection: 'row',
         shadowOffset: {
-            width: 0,
-            height: 2,
+            width: 2,
+            height: 4,
         },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.4,
         shadowRadius: 2,
-        elevation: 1, 
+        elevation: 3,
     },
     imageWarning: {
         height: 80,
         resizeMode: 'cover',
-        borderWidth: 1,
-        borderColor: "#000", 
     },
     itemText: {
         textAlign: 'center',
