@@ -7,6 +7,7 @@ import ChatScreen from "./page/Chat";
 import HomeScreen from "./page/Home";
 import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
+import MealPlannerScreen from "./page/MealPlan";
 import Footer from "./layout/Footer"; // Import Footer component
 
 const Stack = createStackNavigator();
@@ -36,6 +37,11 @@ const App = () => {
           <Stack.Screen
             name="Chat"
             component={ChatScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Plan"
+            component={MealPlannerScreen}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>
