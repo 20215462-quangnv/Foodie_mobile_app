@@ -80,6 +80,18 @@ const Footer = () => {
           />
           <Text style={[styles.iconText, activeTab === "Chat" && { color: "yellow" }]}>CHAT</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => handlePress("Plan")}
+        >
+          <Icon
+            name="calendar-alt"
+            size={24}
+            color={activeTab === "Plan" ? "yellow" : "white"}
+          />
+          <Text style={[styles.iconText, activeTab === "Plan" && { color: "yellow" }]}>PLAN</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
