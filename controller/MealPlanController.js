@@ -89,5 +89,31 @@ module.exports = {
             console.error('Error updating meal-plan:', error); 
             throw error;
         }
+    },
+    getAllMealPlan : async (listGroup) => {
+        try {
+            const queryString = listGroup.map(group => `groupIds=${group.id}`).join('&');
+            const endpoint = `http://localhost:8080/api/meal/groups?${queryString}`;
+
+            // Fetch request
+            const response = await fetch(endpoint, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+            });
+            if (response.ok) {
+                console.log('fetch meal-plan thanh cong')
+                return response.json();
+            }
+            else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        }
+        catch (error) {
+            console.error('Error fetching meal-plan:', error); 
+            throw error;
+        }
     }
 }
