@@ -14,7 +14,6 @@ import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
 import LoginScreen from "./page/Login";
 import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
-import MealPlannerScreen from "./page/MealPlan";
 import Footer from "./layout/Footer";
 import GroupScreen from "./page/GroupScreen";
 import EditRecipeScreen from "./page/NewScreenTab/Recipetab/EditRecipeScreen";
@@ -54,6 +53,36 @@ const App = () => {
             name="Chat"
             component={ChatScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CreateGroupScreen"
+            component={CreateGroupScreen}
+            options={{
+              title: "Create New Group",
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: "#4EA72E",
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
+          />
+          <Stack.Screen
+            name="GroupScreen"
+            component={GroupScreen}
+            options={{
+              title: "Group Details",
+              headerShown: true,
+              headerStyle: {
+                backgroundColor: "#4EA72E",
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
           />
         </Stack.Navigator>
 
