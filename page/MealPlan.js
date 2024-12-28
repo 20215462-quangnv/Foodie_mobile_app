@@ -178,8 +178,7 @@ const MealPlannerScreen = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': `Bearer ${token}`,
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJsZXZhbm1pbmgxOTEwMjAwM0BnbWFpbC5jb20iLCJpYXQiOjE3MzUzNzY0NzksImV4cCI6MTczNTQ2Mjg3OX0.S-hW98ZE2Emk4rG0dYtViy12SmfR7WWQ4AJ2gYNnpss`,
+          'Authorization': `Bearer ${token}`,
         }
       })
       const json = await response.json();
