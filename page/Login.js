@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,8 +8,36 @@ import {
   StyleSheet,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { colors } from "./styles/RootStyle";
+import { Login } from "../controller/AuthController";
 
-const LoginScreen = () => {
+const LoginScreen = ({navigation}) => {
+
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter your email and password");
+      return;
+    }
+
+    try {
+      const data = await Login(email, password, navigation);
+      if (data?.token) {
+        console.log("Login successful:", data);
+        
+      } else {
+        alert("Login failed! Please check your credentials.");
+      }
+      
+    }
+    catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -26,10 +54,25 @@ const LoginScreen = () => {
 
       <TextInput
         style={styles.input}
-        placeholder="Enter your phone number"
-        keyboardType="phone-pad"
+        placeholder="Enter your gmail"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
       />
 
+       <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+      />
+
+      <TouchableOpacity style={[styles.button, styles.facebookButton]} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Đăng nhập</Text>
+      </TouchableOpacity>
+
+       <Text style={styles.subText}>Đăng nhập bằng phương thức khác</Text>
       <TouchableOpacity style={[styles.button, styles.facebookButton]}>
         <Icon name="facebook" size={24} color="white" />
         <Text style={styles.buttonText}>Sign in with Facebook</Text>
@@ -38,6 +81,12 @@ const LoginScreen = () => {
       <TouchableOpacity style={[styles.button, styles.emailButton]}>
         <Icon name="envelope" size={24} color="white" />
         <Text style={styles.buttonText}>Sign in with Email</Text>
+      </TouchableOpacity>
+
+
+      <Text style={styles.subText}>Chưa có tài khoản?</Text>
+      <TouchableOpacity style={[styles.button, styles.facebookButton]}>
+        <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
     </View>
   );
@@ -49,7 +98,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   header: {
     alignItems: "center",
