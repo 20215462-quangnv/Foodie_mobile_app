@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Modal,
+  ActivityIndicator,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import {getFoodByGroup} from '../../../controller/FoodController';
 import {createMealPlan} from '../../../controller/MealPlanController';
 
-const CreateMealPlan = ({ route }) => {
+const CreateMealPlan = ({ route, navigation }) => {
   const {groupList} = route.params;
   const [mealName, setMealName] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -22,8 +24,13 @@ const CreateMealPlan = ({ route }) => {
   const [selectedMeal, setSelectedMeal] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  
+  // New states for loading and result modals
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
 
-  // Fetch meals when selected group changes
   useEffect(() => {
     if (selectedGroup) {
       fetchMeals(selectedGroup);
@@ -32,7 +39,6 @@ const CreateMealPlan = ({ route }) => {
 
   const fetchMeals = async (groupId) => {
     try {
-      // Replace with your actual API endpoint
       const response = await getFoodByGroup(groupId);
       setMeals(response.data);
     } catch (error) {
@@ -55,6 +61,7 @@ const CreateMealPlan = ({ route }) => {
   };
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     try {
       const mealPlan = {
         name: mealName,
@@ -62,22 +69,69 @@ const CreateMealPlan = ({ route }) => {
         foodId: selectedMeal
       };
 
-      // Replace with your actual API endpoint
-      console.log(mealPlan)
-      const response = await createMealPlan(mealPlan)
+      const response = await createMealPlan(mealPlan);
+      
+      setIsLoading(false);
+      setIsSuccess(true);
+      setResultMessage('Tạo kế hoạch thành công!');
+      setShowResult(true);
 
-      // Handle success
-      console.log('Meal plan created successfully');
-      // Reset form
+      // Reset form after successful creation
       setMealName('');
       setSelectedDate(new Date());
       setSelectedTime(new Date());
       setSelectedGroup('');
       setSelectedMeal('');
+      
     } catch (error) {
+      setIsLoading(false);
+      setIsSuccess(false);
+      setResultMessage('Có lỗi xảy ra khi tạo kế hoạch. Vui lòng thử lại!');
+      setShowResult(true);
       console.error('Error creating meal plan:', error);
     }
   };
+
+  const handleCloseResult = () => {
+    setShowResult(false);
+    if (isSuccess) {
+      // navigation.goBack()
+    }
+  };
+
+  // Loading Modal
+  const LoadingModal = () => (
+    <Modal transparent visible={isLoading}>
+      <View style={styles.modalBackground}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#4EA72E" />
+          <Text style={styles.loadingText}>Đang xử lý...</Text>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // Result Modal
+  const ResultModal = () => (
+    <Modal transparent visible={showResult}>
+      <View style={styles.modalBackground}>
+        <View style={styles.resultContainer}>
+          <Text style={[
+            styles.resultText,
+            { color: isSuccess ? '#4EA72E' : '#FF0000' }
+          ]}>
+            {resultMessage}
+          </Text>
+          <TouchableOpacity
+            style={[styles.resultButton, { backgroundColor: isSuccess ? '#4EA72E' : '#FF0000' }]}
+            onPress={handleCloseResult}
+          >
+            <Text style={styles.resultButtonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
@@ -85,7 +139,7 @@ const CreateMealPlan = ({ route }) => {
         <Text style={styles.headerText}>Tạo Kế Hoạch</Text>
       </View>
       <ScrollView style={styles.container}>
-
+        {/* Existing form content */}
         <View style={styles.formGroup}>
           <Text style={styles.label}>Tên bữa ăn</Text>
           <TextInput
@@ -168,11 +222,15 @@ const CreateMealPlan = ({ route }) => {
           <Text style={styles.submitButtonText}>Tạo Kế Hoạch</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <LoadingModal />
+      <ResultModal />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  // Existing styles...
   header: {
     flex: 0.1, 
     backgroundColor: "#4EA72E", 
@@ -181,7 +239,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    // paddingBottom : 10,
   },
   headerText: {
     color: 'white',
@@ -233,6 +290,48 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  // New styles for modals
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+  },
+  resultContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    width: '80%',
+  },
+  resultText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  resultButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  resultButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
