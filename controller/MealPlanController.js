@@ -1,13 +1,20 @@
-const API_URL = 'http://localhost:8080/api/meal';
+import { getToken } from "../controller/AuthController";
+import { getUserProfile } from "./UserController";
+const API_URL = 'http://192.168.100.183:8080/api/meal';
 
-module.exports = {
-    getMealPlan : async (groupId, date) => {
+const getBearerAuth = async () => {
+    const token = await getToken(); // Lấy token từ AsyncStorage
+    return `Bearer ${token}`; // Trả về chuỗi Bearer token
+  };
+
+    const getMealPlan = async (groupId, date) => {
         try {
+            const bearerAuth = await getBearerAuth();
             const response = await fetch(`${API_URL}?date=${date}&groupId=${groupId}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': bearerAuth,
                 },
             })
             if (response.ok) {
@@ -22,14 +29,15 @@ module.exports = {
             console.error('Error fetching meal-plan:', error); 
             throw error;
         }
-    },
-    createMealPlan : async (newPlan) => {
+    };
+    const createMealPlan = async (newPlan) => {
         try {
+            const bearerAuth = await getBearerAuth();
             const response = await fetch(`${API_URL}`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': bearerAuth,
                 },
                 body: JSON.stringify(newPlan)
             })
@@ -45,14 +53,15 @@ module.exports = {
             console.error('Error creating meal-plan:', error); 
             throw error;
         }
-    },
-    deleteMealPlan : async (planId) => {
+    };
+    const deleteMealPlan = async (planId) => {
         try {
-            const response = await fetch(`${API_URL}?Id=${planId}`, {
+            const bearerAuth = await getBearerAuth();
+            const response = await fetch(`${API_URL}/${planId}`, {
                 method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': bearerAuth,
                 },
             })
             if (response.ok) {
@@ -67,14 +76,15 @@ module.exports = {
             console.error('Error deleting meal-plan:', error); 
             throw error;
         }
-    },
-    updateMealPlan : async (planId) => {
+    };
+    const updateMealPlan = async (planId) => {
         try {
+            const bearerAuth = await getBearerAuth();
             const response = await fetch(`${API_URL}?Id=${planId}`, {
                 method: 'PUT',
                 headers: {
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': bearerAuth,
                 },
             })
             if (response.ok) {
@@ -89,18 +99,19 @@ module.exports = {
             console.error('Error updating meal-plan:', error); 
             throw error;
         }
-    },
-    getAllMealPlan : async (listGroup) => {
+    };
+    const getAllMealPlan = async (listGroup) => {
         try {
+            const bearerAuth = await getBearerAuth();
             const queryString = listGroup.map(group => `groupIds=${group.id}`).join('&');
-            const endpoint = `http://localhost:8080/api/meal/groups?${queryString}`;
+            const endpoint = `${API_URL}/groups?${queryString}`;
 
             // Fetch request
             const response = await fetch(endpoint, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': bearerAuth,
                   },
             });
             if (response.ok) {
@@ -116,4 +127,11 @@ module.exports = {
             throw error;
         }
     }
+
+export {
+    getMealPlan,
+    deleteMealPlan,
+    updateMealPlan,
+    getAllMealPlan,
+    createMealPlan
 }
