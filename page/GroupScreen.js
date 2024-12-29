@@ -462,16 +462,26 @@ const GroupScreen = ({ route }) => {
       {group && (
         <View style={styles.groupHeader}>
           <View style={styles.headerContent}>
-            <View>
+            <View style={styles.headerTextContainer}>
               <Text style={styles.groupName}>{group.name}</Text>
               <Text style={styles.groupDescription}>{group.description}</Text>
             </View>
-            <TouchableOpacity
-              style={styles.managementButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <Icon name="ellipsis-v" size={24} color="#fff" />
-            </TouchableOpacity>
+            <View style={styles.headerButtons}>
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() =>
+                  navigation.navigate("GroupManagement", { groupId: groupId })
+                }
+              >
+                <Icon name="cog" size={22} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => setModalVisible(true)}
+              >
+                <Icon name="ellipsis-v" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}
@@ -583,6 +593,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
+    paddingRight: 5,
+  },
+  headerTextContainer: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 20,
+    padding: 5,
+  },
+  headerButton: {
+    padding: 8,
+    marginHorizontal: 2,
   },
   managementButton: {
     padding: 10,

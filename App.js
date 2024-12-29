@@ -19,6 +19,8 @@ import MealPlannerScreen from "./page/MealPlan";
 import CreateMealPlan from "./page/NewScreenTab/mealPlanTab/CreateNewPlanScreen";
 import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
 import GroupScreen from "./page/GroupScreen";
+import GroupManagementScreen from "./page/NewScreenTab/GroupTab/GroupManagementScreen";
+import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
 
 const Stack = createStackNavigator();
 
@@ -82,6 +84,35 @@ const RootNavigator = () => {
         }}
       />
       <Stack.Screen name="GroupScreen" component={GroupScreen} />
+      <Stack.Screen
+        name="GroupManagement"
+        component={GroupManagementScreen}
+        options={{
+          title: "Group Management",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="GroupFoodScreen"
+        component={GroupFoodScreen}
+        options={{
+          headerShown: true,
+          title: "Group Foods",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 };
