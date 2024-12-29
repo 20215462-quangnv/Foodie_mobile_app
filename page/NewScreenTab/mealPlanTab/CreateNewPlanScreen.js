@@ -232,7 +232,7 @@ const CreateMealPlan = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   // Existing styles...
   header: {
-    flex: 0.1, 
+    flex: 0.15, 
     backgroundColor: "#4EA72E", 
     padding: 10,
     elevation: 4,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#fff',
-    margin: 20
+    margin: 10
   },
   title: {
     fontSize: 24,
@@ -287,7 +287,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 50,
+    marginTop: 10,
+    marginBottom: 10
   },
   submitButtonText: {
     color: '#fff',
