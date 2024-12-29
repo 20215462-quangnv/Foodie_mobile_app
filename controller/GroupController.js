@@ -11,13 +11,16 @@ const getBearerAuth = async () => {
 // Update group
 async function updateGroup(groupData) {
   const bearerAuth = await getBearerAuth();
-  return fetch(`${API_URL}`, {
+  return fetch(`${API_URL}/${groupData.id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: bearerAuth,
     },
-    body: JSON.stringify(groupData),
+    body: JSON.stringify({
+      name: groupData.name,
+      description: groupData.description,
+    }),
   })
     .then((response) => {
       if (response.ok) {
@@ -32,9 +35,9 @@ async function updateGroup(groupData) {
 }
 
 // Add member to group
-async function addMemberToGroup(groupId, userId) {
+async function addMemberToGroup(groupId, email) {
   const bearerAuth = await getBearerAuth();
-  return fetch(`${API_URL}/${groupId}/members/${userId}`, {
+  return fetch(`${API_URL}/${groupId}/members?email=${email}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -132,9 +135,14 @@ async function deleteGroup(groupId) {
       Authorization: bearerAuth,
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
-        return response.json();
+        try {
+          return await response.json();
+        } catch {
+          console.log(`Successfully deleted group with ID ${groupId}`);
+          return true;
+        }
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     })
