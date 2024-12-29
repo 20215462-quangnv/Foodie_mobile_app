@@ -12,7 +12,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { getAllFoodByGroup } from "../../../controller/FoodController";
-import { updateRecipe } from "/home/vietbuiduc/Documents/Foodie_mobile_app/controller/RecipeController.js";
+import { updateRecipe } from "../../../controller/RecipeController";
 
 const EditRecipeScreen = ({
   setItems,
