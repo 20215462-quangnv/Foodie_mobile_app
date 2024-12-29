@@ -25,7 +25,7 @@ const CreateGroupScreen = ({ navigation }) => {
         description: description,
       };
       await createGroup(groupData);
-      navigation.goBack(); // Quay lại màn hình trước nếu tạo nhóm thành công
+      navigation.goBack();
     } catch (error) {
       Alert.alert("Error", "Failed to create group");
       console.log("Error detail: ", error);
@@ -34,25 +34,34 @@ const CreateGroupScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Group Name"
-        value={groupName}
-        onChangeText={setGroupName}
-        placeholderTextColor="#666"
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Description (optional)"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-        placeholderTextColor="#666"
-      />
-      <TouchableOpacity style={styles.createButton} onPress={handleCreateGroup}>
-        <Text style={styles.buttonText}>Create Group</Text>
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Create New Group</Text>
+      </View>
+
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Group Name"
+          value={groupName}
+          onChangeText={setGroupName}
+          placeholderTextColor="#666"
+        />
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Description (optional)"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
+          placeholderTextColor="#666"
+        />
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={handleCreateGroup}
+        >
+          <Text style={styles.buttonText}>Create Group</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -60,8 +69,25 @@ const CreateGroupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#fff",
+  },
+  header: {
+    height: 200, // This creates space at the top
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#4EA72E",
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  formContainer: {
+    padding: 20,
+    marginTop: -20, // This pulls the form up slightly into the header
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   input: {
     borderWidth: 1,
@@ -81,6 +107,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
+    marginTop: 10,
   },
   buttonText: {
     color: "#fff",

@@ -1,5 +1,11 @@
 import React from "react";
-import { SafeAreaView, StatusBar, View, StyleSheet, Platform } from "react-native";
+import {
+  SafeAreaView,
+  StatusBar,
+  View,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import ChatScreen from "./page/Chat";
@@ -10,7 +16,9 @@ import LoginScreen from "./page/Login";
 import Footer from "./layout/Footer"; // Import Footer component
 import EditRecipeScreen from "./page/NewScreenTab/Recipetab/EditRecipeScreen";
 import MealPlannerScreen from "./page/MealPlan";
-import CreateMealPlan from "./page/NewScreenTab/mealPlanTab/CreateNewPlanScreen"
+import CreateMealPlan from "./page/NewScreenTab/mealPlanTab/CreateNewPlanScreen";
+import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
+import GroupScreen from "./page/GroupScreen";
 
 const Stack = createStackNavigator();
 
@@ -27,14 +35,14 @@ const App = () => {
       }}
     >
       <SafeAreaView style={styles.container}>
-        {/* Hiển thị thanh trạng thái với màu sắc và kiểu chữ */}
-        <StatusBar 
-          barStyle="dark-content" 
-          backgroundColor={Platform.OS === "android" ? "transparent" : undefined} 
-          translucent={Platform.OS === "android"} 
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={
+            Platform.OS === "android" ? "transparent" : undefined
+          }
+          translucent={Platform.OS === "android"}
         />
         <RootNavigator />
-        {/* Footer duy nhất */}
         {showFooter && <Footer />}
       </SafeAreaView>
     </NavigationContainer>
@@ -57,12 +65,23 @@ const RootNavigator = () => {
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="Plan" component={MealPlannerScreen} />
       <Stack.Screen name="EditRecipe" component={EditRecipeScreen} />
-      <Stack.Screen name="CreateMealPlan" component={CreateMealPlan}
+      <Stack.Screen
+        name="CreateMealPlan"
+        component={CreateMealPlan}
         options={{
-          title: 'Tạo Kế Hoạch Bữa Ăn',
-          animation: 'slide_from_right'
+          title: "Create Meal Plan",
+          animation: "slide_from_right",
         }}
       />
+      <Stack.Screen
+        name="CreateGroupScreen"
+        component={CreateGroupScreen}
+        options={{
+          title: "Create Group",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen name="GroupScreen" component={GroupScreen} />
     </Stack.Navigator>
   );
 };
@@ -70,7 +89,7 @@ const RootNavigator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff", // Màu nền ứng dụng
+    backgroundColor: "#fff",
   },
 });
 

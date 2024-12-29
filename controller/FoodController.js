@@ -1,6 +1,6 @@
 import { getToken } from "../controller/AuthController";
 import { getUserProfile } from "./UserController";
-const API_URL = "http://192.168.0.6:8080/api/user/food";
+const API_URL = "http://10.0.2.2:8080/api/user/food";
 
 const getBearerAuth = async () => {
   const token = await getToken();
