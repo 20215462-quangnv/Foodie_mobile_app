@@ -168,21 +168,43 @@ const GroupScreen = ({ route }) => {
 
   const handleUpdateSubmit = useCallback(
     async (name, description) => {
+      console.log("=== Update Group Submit Debug Logs ===");
+      console.log("1. Input values:", { name, description });
+
       if (!name.trim()) {
+        console.log("2. Validation failed: Empty name");
         Alert.alert("Error", "Group name cannot be empty");
         return;
       }
+
       try {
+        console.log("3. Preparing update data:", {
+          id: groupId,
+          name: name.trim(),
+          description: description.trim(),
+        });
+
         await updateGroup({
           id: groupId,
           name: name.trim(),
           description: description.trim(),
         });
+
+        console.log("4. Update successful");
         setShowUpdateModal(false);
+
+        console.log("5. Fetching updated group data");
         const response = await getGroupById(groupId);
+        console.log("6. New group data:", response.data);
+
         setGroup(response.data);
         Alert.alert("Success", "Group updated successfully");
       } catch (error) {
+        console.error("7. Update failed:", error);
+        console.error("8. Error details:", {
+          message: error.message,
+          stack: error.stack,
+        });
         Alert.alert("Error", "Failed to update group");
       }
     },

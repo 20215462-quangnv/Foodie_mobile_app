@@ -11,22 +11,27 @@ const getBearerAuth = async () => {
 // Update group
 async function updateGroup(groupData) {
   const bearerAuth = await getBearerAuth();
-  return fetch(`${API_URL}/${groupData.id}`, {
+  return fetch(API_URL, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: bearerAuth,
     },
     body: JSON.stringify({
+      id: groupData.id,
       name: groupData.name,
       description: groupData.description,
+      enable: true,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
         return response.json();
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      throw new Error(
+        `HTTP error! status: ${response.status}, body: ${errorText}`
+      );
     })
     .catch((error) => {
       console.error("Error updating group:", error);
@@ -140,7 +145,6 @@ async function deleteGroup(groupId) {
         try {
           return await response.json();
         } catch {
-          console.log(`Successfully deleted group with ID ${groupId}`);
           return true;
         }
       }
