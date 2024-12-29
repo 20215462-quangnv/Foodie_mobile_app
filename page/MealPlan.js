@@ -168,6 +168,9 @@ const MealPlannerScreen = () => {
       }
     });
     // Chỉ đánh dấu selected cho ngày được chọn
+
+    
+
     newMarkedDates[day.dateString] = {
       ...newMarkedDates[day.dateString],
       selected: true, 
@@ -192,6 +195,12 @@ const MealPlannerScreen = () => {
         plansByDate[selectedDateStr] = mealPlansByDate[selectedDateStr].filter((p) => p.id !== meal.id);
         setMealPlansByDate(plansByDate)
         setPlansForSelectedDate(plansByDate[selectedDateStr] || [])
+        console.log('>>>>>>>>>>',plansForSelectedDate)
+        if(plansByDate[selectedDateStr].length === 0) {
+          const newMarkedDates = markedDates;
+          delete newMarkedDates[selectedDateStr]
+          setMarkedDates(newMarkedDates)
+        }
       }
     }
     catch(err) {
@@ -316,12 +325,14 @@ const MealPlannerScreen = () => {
 
 const styles = {
   header: {
-    backgroundColor: '#10b981',
-    padding: 16,
+    flex: 0.2, 
+    backgroundColor: "#4EA72E", 
+    padding: 10,
     elevation: 4,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    // paddingBottom : 10,
   },
   headerText: {
     color: 'white',
