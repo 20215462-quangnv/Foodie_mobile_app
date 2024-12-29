@@ -12,9 +12,9 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { getAllFoodByGroup } from "../../../controller/FoodController";
-import { updateRecipe } from "/home/vietbuiduc/Documents/Foodie_mobile_app/controller/RecipeController.js";
-import { colors } from "../../styles/RootStyle";
+import { getAllFoodByGroup } from "../controller/FoodController";
+import { updateRecipe } from "../controller/RecipeController";
+import { colors } from "./styles/RootStyle";
 
 const EditRecipeScreen = ({ route, navigation }) => {
   const { editedItem, listFood } = route.params;
