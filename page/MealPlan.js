@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, View, TouchableOpacity, Pressable} from 'react-native';
+import { ActionSheet } from '@ant-design/react-native';
 import { 
   Provider,
   Button,
@@ -11,135 +12,22 @@ import {
   Tag,
   Modal,
 } from '@ant-design/react-native';
-import { IconOutline } from '@ant-design/icons-react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import Icon from "react-native-vector-icons/FontAwesome";
 import { Calendar } from 'react-native-calendars';
-import mealPlanController from '../controller/MealPlanController';
+import {getAllMealPlan, deleteMealPlan} from '../controller/MealPlanController';
+import { getToken } from '../controller/AuthController';
+import { useNavigation } from '@react-navigation/native';
 
 const MealPlannerScreen = () => {
+  const navigation = useNavigation()
+  const getBearerAuth = async () => {
+    const token = await getToken(); // Lấy token từ AsyncStorage
+    return `Bearer ${token}`; // Trả về chuỗi Bearer token
+  };
+
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [mealPlan, setMealPlan] = useState([
-    {
-      "id": 13,
-      "createdAt": "2024-12-27T23:30:37.144454",
-      "updatedAt": "2024-12-27T23:31:18.191624",
-      "name": "bua sang",
-      "timeStamp": "2024-12-28T00:00",
-      "status": "PASSED",
-      "food": {
-        "id": 9,
-        "createdAt": "2024-12-27T23:15:38.120555",
-        "updatedAt": "2024-12-27T23:15:38.120555",
-        "name": "food1",
-        "type": "string",
-        "description": "test",
-        "imageUrl": null,
-        "owner": {
-          "id": 4,
-          "createdAt": "2024-12-27T22:29:00.928869",
-          "updatedAt": "2024-12-27T22:29:00.928869",
-          "email": "levanminh19102003@gmail.com",
-          "fullName": "le minh",
-          "phoneNumber": "0948524911",
-          "timeZone": 0,
-          "language": "1",
-          "deviceId": "string",
-          "photoUrl": null,
-          "notificationToken": null,
-          "username": "levanminh19102003@gmail.com",
-          "groupIds": [
-            16,
-            17
-          ]
-        },
-        "measureUnit": null,
-        "foodCategory": null,
-        "groupId": 16
-      },
-      "group_id": 16,
-      "owner_id": 4
-    },
-    {
-      "id": 14,
-      "createdAt": "2024-12-28T16:07:52.081279",
-      "updatedAt": "2024-12-28T16:07:52.081279",
-      "name": "bữa trưa",
-      "timeStamp": "2024-12-28T18:00",
-      "status": "NOT_PASS_YET",
-      "food": {
-        "id": 9,
-        "createdAt": "2024-12-27T23:15:38.120555",
-        "updatedAt": "2024-12-27T23:15:38.120555",
-        "name": "food1",
-        "type": "string",
-        "description": "test",
-        "imageUrl": null,
-        "owner": {
-          "id": 4,
-          "createdAt": "2024-12-27T22:29:00.928869",
-          "updatedAt": "2024-12-27T22:29:00.928869",
-          "email": "levanminh19102003@gmail.com",
-          "fullName": "le minh",
-          "phoneNumber": "0948524911",
-          "timeZone": 0,
-          "language": "1",
-          "deviceId": "string",
-          "photoUrl": null,
-          "notificationToken": null,
-          "username": "levanminh19102003@gmail.com",
-          "groupIds": [
-            16,
-            17
-          ]
-        },
-        "measureUnit": null,
-        "foodCategory": null,
-        "groupId": 16
-      },
-      "group_id": 16,
-      "owner_id": 4
-    },
-    {
-      "id": 15,
-      "createdAt": "2024-12-28T16:20:54.590797",
-      "updatedAt": "2024-12-28T16:20:54.590797",
-      "name": "bữa tối",
-      "timeStamp": "2024-12-29T18:00",
-      "status": "NOT_PASS_YET",
-      "food": {
-        "id": 10,
-        "createdAt": "2024-12-28T16:19:08.859644",
-        "updatedAt": "2024-12-28T16:19:08.859644",
-        "name": "ga ham",
-        "type": "",
-        "description": "món hầm",
-        "imageUrl": null,
-        "owner": {
-          "id": 4,
-          "createdAt": "2024-12-27T22:29:00.928869",
-          "updatedAt": "2024-12-27T22:29:00.928869",
-          "email": "levanminh19102003@gmail.com",
-          "fullName": "le minh",
-          "phoneNumber": "0948524911",
-          "timeZone": 0,
-          "language": "1",
-          "deviceId": "string",
-          "photoUrl": null,
-          "notificationToken": null,
-          "username": "levanminh19102003@gmail.com",
-          "groupIds": [
-            16,
-            17
-          ]
-        },
-        "measureUnit": null,
-        "foodCategory": null,
-        "groupId": 17
-      },
-      "group_id": 17,
-      "owner_id": 4
-    }
-  ]);
+  const [plansForSelectedDate, setPlansForSelectedDate] = useState();
+  const [mealPlan, setMealPlan] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   // const [showDatePicker, setShowDatePicker] = useState(false);
@@ -160,9 +48,12 @@ const MealPlannerScreen = () => {
       setError(null);
       // await fetchGroup();
       // const formattedDate = date.toISOString().split('T')[0];
-      const data = await mealPlanController.getAllMealPlan(listGroup);
-      const sortedData = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      const data = await getAllMealPlan(listGroup);
+      const sortedData = data.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      // console.log('>>>>>>>>>sortedData',sortedData)
       setMealPlan(sortedData);
+      // console.log('>>>>', data.data)
+      return data.data
     } catch (err) {
       // setError('Không thể tải dữ liệu');
     } finally {
@@ -173,26 +64,29 @@ const MealPlannerScreen = () => {
 
   const fetchGroup = async () => {
     try {
+    const bearerAuth = await getBearerAuth();
       setLoading(true);
-      const response = await fetch('http://localhost:8080/api/user/group/all', {
+      const response = await fetch('http://192.168.100.183:8080/api/user/group/all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': bearerAuth,
         }
       })
       const json = await response.json();
-      const groups = []
+      console.log(json)
+      let groups = []
       if (json.resultCode === 'SUCCESS') {
         groups = json.data.map(group => ({
           id: group.id,
           name: group.name
         }))
       }
+      // console.log(groups)
       setListGroup(groups);
     }
     catch(err) {
-      console.log('Error fetching groups:', err);
+      // console.log('Error fetching groups:', err);
       setListGroup([
         {
           id: 16,
@@ -203,6 +97,7 @@ const MealPlannerScreen = () => {
           name: 'nha'
         },
       ])
+      console.error("Error fetching groups:", err);
     }
     finally {
       setAlreadyFetchGroup(true)
@@ -213,31 +108,26 @@ const MealPlannerScreen = () => {
     const plansByDate = {};
     const marked = {};
 
+    // Đánh dấu dot cho những ngày có meal plan
     mealPlans.forEach(plan => {
       const dateStr = getDateString(plan.timeStamp);
-      
-      // Nhóm meal plans theo ngày
       if (!plansByDate[dateStr]) {
         plansByDate[dateStr] = [];
       }
       plansByDate[dateStr].push(plan);
-
-      // Đánh dấu ngày có meal plan trên calendar
-      marked[dateStr] = {
+      marked[dateStr] = { 
         marked: true,
-        dotColor: '#10b981'
+        dotColor: '#10b981' 
       };
     });
 
-    // Nếu có ngày được chọn, đánh dấu nó
-    const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    marked[selectedDateStr] = {
-      ...marked[selectedDateStr],
-      selected: true,
-      selectedColor: '#10b981'
-    };
-
     setMealPlansByDate(plansByDate);
+    // Thêm selected cho ngày được chọn
+    marked[selectedDate.toISOString().split('T')[0]] = {
+      ...marked[selectedDate.toISOString().split('T')[0]],
+      selected: true, 
+      selectedColor: '#10b981' 
+    };
     setMarkedDates(marked);
   };
 
@@ -247,8 +137,7 @@ const MealPlannerScreen = () => {
 
   useEffect(() => {
     if (alreadyFetchGroup) {
-      fetchMealPlan()
-      organizeMealPlans(mealPlan);
+      fetchMealPlan().then(data => {organizeMealPlans(data)});
     }
   }, [alreadyFetchGroup]);
 
@@ -260,9 +149,31 @@ const MealPlannerScreen = () => {
     setIdToNameMap(map);
   }, [listGroup]);
 
+  useEffect(() => {
+    const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    setPlansForSelectedDate(mealPlansByDate[selectedDateStr] || []);
+  }, [selectedDate, mealPlansByDate]);
+
   const onDayPress = (day) => {
-    const selectedDate = new Date(day.dateString);
-    setSelectedDate(selectedDate);
+    setSelectedDate(new Date(day.dateString));
+    // Cập nhật markedDates khi chọn ngày mới
+    const newMarkedDates = {};
+    // Giữ lại dots cho những ngày có meal plan
+    Object.entries(markedDates).forEach(([date, mark]) => {
+      if (mark.dotColor) {
+        newMarkedDates[date] = { 
+          marked: true,
+          dotColor: mark.dotColor 
+        };
+      }
+    });
+    // Chỉ đánh dấu selected cho ngày được chọn
+    newMarkedDates[day.dateString] = {
+      ...newMarkedDates[day.dateString],
+      selected: true, 
+      selectedColor: '#10b981' 
+    };
+    setMarkedDates(newMarkedDates);
   };
 
       // creat modal
@@ -272,12 +183,28 @@ const MealPlannerScreen = () => {
         }
       }
 
+  const handleDeleteMealPlan = async (meal) => {
+    try {
+      const selectedDateStr = selectedDate.toISOString().split('T')[0];
+      const response = await deleteMealPlan(meal.id);
+      if (response.resultCode === "SUCCESS") {
+        const plansByDate = mealPlansByDate
+        plansByDate[selectedDateStr] = mealPlansByDate[selectedDateStr].filter((p) => p.id !== meal.id);
+        setMealPlansByDate(plansByDate)
+        setPlansForSelectedDate(plansByDate[selectedDateStr] || [])
+      }
+    }
+    catch(err) {
+      console.error('cant delete', err);
+    }
+  }
   const renderMealPlan = () => {
-    const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    const plansForSelectedDate = mealPlansByDate[selectedDateStr] || [];
+    // const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    // // const plansForSelectedDate = mealPlansByDate[selectedDateStr] || [];
+    // setPlansForSelectedDate(mealPlansByDate[selectedDateStr] || []);
     if (loading) {
       return (
-        <View style={{ alignItems: 'center', marginTop: 20 }}>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator text="Loading..." />
         </View>
       );
@@ -295,28 +222,61 @@ const MealPlannerScreen = () => {
     //   new Date(a.timeStamp) - new Date(b.timeStamp)
     // );
 
+
+
+    const handleLongPress = (meal) => {
+      const BUTTONS = ['Chỉnh sửa', 'Xóa', 'Hủy'];
+      const CANCEL_INDEX = 2;
+      const DESTRUCTIVE_INDEX = 1;
+  
+      ActionSheet.showActionSheetWithOptions(
+        {
+          options: BUTTONS,
+          cancelButtonIndex: CANCEL_INDEX,
+          destructiveButtonIndex: DESTRUCTIVE_INDEX,
+          title: 'Tùy chọn',
+        },
+        (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0:
+              console.log('Edit meal:', meal);
+              break;
+            case 1: // Xóa
+              console.log('Delete meal:', meal);
+              handleDeleteMealPlan(meal);
+              break;
+          }
+        }
+      );
+    };
+
     return plansForSelectedDate.map((meal, index) => (
       <View key={index}>
-        <Card>
-          <Card.Header
-            title={<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{meal.name}</Text>}
-            extra={
-              <Tag
-                style={meal.status === "NOT_PASS_YET" ? styles.successTag : styles.warningTag}
-              >
-                {meal.status === "NOT_PASS_YET" ? 'Chưa đến' : 'Đã qua'}
-              </Tag>
-            }
-          />
-          <Card.Body>
-            <View style={{ padding: 15 }}>
-              <Text>Giờ: {meal.timeStamp.split('T')[1]}</Text>
-              <Text>Món ăn: {meal.food.name}</Text>
-              <Text>Nhóm: {idToNameMap[meal.group_id]}</Text>
-              <Text>Người tạo: {meal.owner_id}</Text>
-            </View>
-          </Card.Body>
-        </Card>
+        <Pressable
+          onLongPress={() => handleLongPress(meal)}
+          delayLongPress={500} // 500ms delay để kích hoạt long press
+        >
+          <Card>
+            <Card.Header
+              title={<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{meal.name}</Text>}
+              extra={
+                <Tag
+                  style={meal.status === "NOT_PASS_YET" ? styles.successTag : styles.warningTag}
+                >
+                  {meal.status === "NOT_PASS_YET" ? 'Chưa đến' : 'Đã qua'}
+                </Tag>
+              }
+            />
+            <Card.Body>
+              <View style={{ padding: 15 }}>
+                <Text>Giờ: {meal.timeStamp.split('T')[1]}</Text>
+                <Text>Món ăn: {meal.food.name}</Text>
+                <Text>Nhóm: {idToNameMap[meal.group_id]}</Text>
+                <Text>Người tạo: {meal.owner_id}</Text>
+              </View>
+            </Card.Body>
+          </Card>
+        </Pressable>
         <WhiteSpace size="lg" />
       </View>
     ));
@@ -328,12 +288,9 @@ const MealPlannerScreen = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerText}>Kế Hoạch Bữa Ăn</Text>
-          <Button 
-            style={styles.addButton}
-            onPress={() => setVisible(true)}
-          >
-            <IconOutline name="plus-circle" size={35} color="white" />
-          </Button>
+            <TouchableOpacity onPress={() => navigation.navigate('CreateMealPlan', {groupList: listGroup})}>
+                <Icon name="plus" size={24} color="white" />
+            </TouchableOpacity>
         </View>
 
         <Calendar
@@ -347,7 +304,7 @@ const MealPlannerScreen = () => {
         />
 
         {/* Content */}
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1, marginTop: 20}}>
           <WingBlank size="lg">
             {renderMealPlan()}
           </WingBlank>
@@ -364,7 +321,7 @@ const styles = {
     elevation: 4,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   headerText: {
     color: 'white',
@@ -382,7 +339,7 @@ const styles = {
   warningTag: {
     backgroundColor: '#f50',
     borderColor: '#f50',
-  },
+  }
 };
 
 export default MealPlannerScreen;
