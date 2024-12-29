@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "1071647366230",
+    "project_id": "food-app-7b572",
+    "storage_bucket": "food-app-7b572.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071647366230:android:a18c57227b6a20e95d6ff7",
+        "android_client_info": {
+          "package_name": "com.soict.Foodie_mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpNk-jaKeI_20sTOmd5jWPKgGifz1kpgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071647366230:android:6313c8f8423a1d555d6ff7",
+        "android_client_info": {
+          "package_name": "com.soict.food"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpNk-jaKeI_20sTOmd5jWPKgGifz1kpgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071647366230:android:e648b2fe7b3c8b505d6ff7",
+        "android_client_info": {
+          "package_name": "com.soict.food.hehe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpNk-jaKeI_20sTOmd5jWPKgGifz1kpgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, useContext} from "react";
 import { 
     View, 
     Text, 
@@ -12,7 +12,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Footer from '../layout/Footer';
 import { getFridgeGroup, getAllFridgeGroup } from "../controller/FridgeController";
 import { getAllRecipes } from "../controller/RecipeController";
-
+import { FoodContext } from "../controller/FoodProviderContext";
 const HomeScreen = ({ navigation })=> {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [recipeItems, setRecipeItems] = useState([]);
@@ -30,8 +30,8 @@ const HomeScreen = ({ navigation })=> {
             name: item.name,
             description: item.description,
             htmlContent: item.htmlContent,
-            authorName: item.author.fullName, 
-            food: item.food, 
+            author: item.author,
+            food: item.food,  
             createdAt: item.createdAt,
             updatedAt: item.updatedAt
           })));  
@@ -55,7 +55,6 @@ const HomeScreen = ({ navigation })=> {
                 return item.data.map(subItem => ({
                     foodName: subItem.foodName,
                     quantity: subItem.quantity,
-                    useWithin: subItem.useWithin,
                     note: subItem.note,
                     foodId: subItem.foodId,
                     ownerId: subItem.ownerId,
@@ -78,10 +77,6 @@ const HomeScreen = ({ navigation })=> {
   const checkExpired = (expiredDate) => {
     const today = new Date();
     const expirationDate = new Date(expiredDate);
-
-    today.setHours(0, 0, 0, 0);
-    expirationDate.setHours(0, 0, 0, 0);
-
     const timeDifference = expirationDate - today;
     const daysLeft = timeDifference / (1000 * 3600 * 24);
 
@@ -90,8 +85,10 @@ const HomeScreen = ({ navigation })=> {
 
 
 
-
-
+    const { listFood, loading } = useContext(FoodContext);
+    const handleShowEditRecipe = (item) => {
+        navigation.navigate('EditRecipe', {editedItem : item, listFood: listFood});
+    };
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -140,7 +137,7 @@ const HomeScreen = ({ navigation })=> {
                     </Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {recipeItems.map((item, i)  => (
-                            <View key={i} style={styles.itemSuggest}>
+                            <TouchableOpacity key={i} style={styles.itemSuggest} onPress={() => handleShowEditRecipe(item)}>
                                 <Text style={styles.titleSuggest}>{item.name}</Text>
                                 <Image
                                     source={{
@@ -149,7 +146,7 @@ const HomeScreen = ({ navigation })=> {
                                     style={styles.imageSuggest}
                                     onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
                                 />
-                            </View>
+                            </TouchableOpacity>
                         ))}
                     </ScrollView>
                 </View>
@@ -182,7 +179,7 @@ const HomeScreen = ({ navigation })=> {
                                             {daysLeft < 0 && 
                                                 (<Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>)
                                             }
-                                             {daysLeft >= 0 && 
+                                             {daysLeft >= 0 && daysLeft <= 2 &&
                                                 <Text style={styles.textOrange}>SẮP HẾT HẠN</Text>
                                             }
                                             

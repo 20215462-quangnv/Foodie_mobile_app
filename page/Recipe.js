@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useContext} from "react";
 import { 
     View, 
     Text, 
@@ -15,6 +15,9 @@ import { getAllRecipes, createRecipe, deleteRecipe } from '../controller/RecipeC
 import { getUserProfile } from "../controller/UserController.js";
 import { colors } from "./styles/RootStyle.js";
 import { getAllFoodByGroup } from "../controller/FoodController.js";
+import { FoodContext } from "../controller/FoodProviderContext.js";
+
+
 
 const RecipeScreen = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -41,35 +44,37 @@ const RecipeScreen = ({ navigation }) => {
         } 
         fetchData();  
     }, []); 
-    const [listFood, setListFood] = useState([]);
-    useEffect(() => {
-      async function fetchData() {
-        try {
-          const data = await getAllFoodByGroup(); 
-          setListFood(data
-            .filter(item => item.data && item.data.length > 0)
-            .map(item => {
-                console.log("item   " + item.data[0].name);
-              return item.data.map(subItem => ({
-                id: subItem.id,
-                name: subItem.name,
-                type: subItem.type,
-                description: subItem.description,
-                imageUrl: subItem.imageUrl,
-                measureUnit: subItem.measureUnit,
-                foodCategory: subItem.foodCategory.name,
-              }))
+    const { listFood, loading } = useContext(FoodContext);
+    
+    // const [listFood, setListFood] = useState([]);
+    // useEffect(() => {
+    //   async function fetchData() {
+    //     try {
+    //       const data = await getAllFoodByGroup(); 
+    //       setListFood(data
+    //         .filter(item => item.data && item.data.length > 0)
+    //         .map(item => {
+    //             console.log("item   " + item.data[0].name);
+    //           return item.data.map(subItem => ({
+    //             id: subItem.id,
+    //             name: subItem.name,
+    //             type: subItem.type,
+    //             description: subItem.description,
+    //             imageUrl: subItem.imageUrl,
+    //             measureUnit: subItem.measureUnit,
+    //             foodCategory: subItem.foodCategory.name,
+    //           }))
              
-            })
-            .flat()
-          ); 
-        } catch (error) {
-          setError('Error fetching recipes');  
-        }
-      }
+    //         })
+    //         .flat()
+    //       ); 
+    //     } catch (error) {
+    //       setError('Error fetching recipes');  
+    //     }
+    //   }
       
-      fetchData(); 
-    }, []); 
+    //   fetchData(); 
+    // }, []); 
     //Get Recipes
     const [items, setItems] = useState([]);
     useEffect(() => {

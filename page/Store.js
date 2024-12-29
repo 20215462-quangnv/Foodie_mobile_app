@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect, useContext} from "react";
 import { 
     View, 
     Text, 
@@ -11,16 +11,29 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import DateTimePicker from "@react-native-community/datetimepicker";
+//import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Footer from '../layout/Footer';
-import { getFridgeGroup, getAllFridgeGroup } from "../controller/FridgeController";
-
+import { FoodContext } from "../controller/FoodProviderContext.js";
+import { getUserFromStorage } from "../controller/UserController.js";
+import {getAllFridgeGroup, createFridgeItem, updateFridgeItem, deleteFridgeItem} from "../controller/FridgeController.js" 
 
 const StoreScreen = ({ navigation }) => {
+    const checkExpired = (expiredDate) => {
+        const today = new Date();
+        const expirationDate = new Date(expiredDate);
+        const timeDifference = expirationDate - today;
+        const daysLeft = timeDifference / (1000 * 60);
+        return daysLeft;
+    };
+
     const [items, setItems] = useState([]);
+    const [userProfile, setUserProfile] = useState({});
     useEffect(() => {
         async function fetchData() {
-          try {
+            try {
+                const userProfileeee = await getUserFromStorage();
+                setUserProfile(userProfileeee);
             const data = await getAllFridgeGroup();  
             setItems(data
             .filter(item => item.data && item.data.length > 0)  // Loại bỏ các item không thỏa mãn điều kiện
@@ -28,16 +41,20 @@ const StoreScreen = ({ navigation }) => {
                 console.log(item.data.length);
                 console.log(item.data[0].food);
                 console.log(new Date(item.data[0].expiredDate));
-                return item.data.map(subItem => ({
+               return item.data.map(subItem => {
+                const expiredDate = new Date(subItem.expiredDate); 
+                   return {
+                    id: subItem.id,
                     foodName: subItem.foodName,
                     quantity: subItem.quantity,
-                    useWithin: subItem.useWithin,
                     note: subItem.note,
                     foodId: subItem.foodId,
                     ownerId: subItem.ownerId,
-                    expiredDate: new Date(subItem.expiredDate),
+                    expiredDate: expiredDate,
                     food: subItem.food,
-                }));
+                };
+            });
+
             })
             .flat()
             );
@@ -63,11 +80,8 @@ const StoreScreen = ({ navigation }) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isSelectionMode, setIsSelectionMode] = useState(false); 
     const [selectedItems, setSelectedItems] = useState(null);
-    const onDateChange = (event, selectedDate) => {
-      const currentDate = selectedDate || editedItem.date;
-      setShowDatePicker(Platform.OS === "ios" ? true : false);
-      setEditedItem({ ...editedItem, date: currentDate });
-    };
+    const [showFoodSelectModal, setShowFoodSelectModal] = useState(false);
+    const { listFood, loading } = useContext(FoodContext);
     
 
     const openModal = (item) => {
@@ -82,27 +96,64 @@ const StoreScreen = ({ navigation }) => {
     const openAddItemModal = () => {
       
         setAddItemModalVisible(true);
+        setAddingItem({});
     };
+
+  const handleShowChooseFood = () => {
+    if (showFoodSelectModal) {
+      setShowFoodSelectModal(false);
+    }
+    else setShowFoodSelectModal(true);
+  }
     const handleSave = () => {
-        setItems((prevItems) =>
-            prevItems.map((item) =>
-                item.foodId === editedItem.foodId ? { ...item, ...editedItem } : item
-            )
-        );
-        setModalVisible(false);
+         const newItem = {
+            foodName: editedItem.foodName,
+            quantity: editedItem.quantity,
+            useWithin: checkExpired(editedItem.expiredDate),
+            note: editedItem.note,
+            foodId: editedItem.food.id,
+            ownerId:  userProfile.id,
+         };
+        console.log("edit within: " + newItem.useWithin);
+        updateFridgeItem(editedItem.id, newItem)
+            .then((update) => {
+            update.expiredDate = new Date(update.expiredDate)
+            setItems((prevItems) => [...prevItems, update]);
+            setShowFoodSelectModal(false);
+            setModalVisible(false);
+            alert('Update thực phẩm thành công:', update);
+            console.log('Fridge Item successfully added:', update);
+        })
+            .catch((error) => {
+              alert('Update thực phẩm thất bại, thử lại');
+          console.error('Failed to create Fridge Item:', error);
+        });
     };
     const handleSaveAddedItem = () => {
-        setAddingItem(null);
+        
         const newItem = {
-            id: items.length + 1, // Hoặc dùng logic tạo ID khác
-            name: addingItem.name || "New Item",
-            image: "https://t4.ftcdn.net/jpg/05/38/99/75/360_F_538997597_wXUHi67t6VMLEcVTW2c6D2P9F0e1f6yE.jpg", // Hình mặc định
-            quantity: addingItem.quantity || 1,
-            state: addingItem.state || "Available",
-            date: addingItem.date || new Date().toISOString().split("T")[0], // Ngày mặc định là hôm nay
+            foodName: addingItem.name,
+            quantity: addingItem.quantity,
+            useWithin: checkExpired(addingItem.expiredDate),
+            note: addingItem.note,
+            foodId: addingItem.food.id,
+            ownerId:  userProfile.id,
         };
-        setItems((prevItems) => [...prevItems, newItem]);
-        setAddItemModalVisible(false); 
+        createFridgeItem(newItem)
+            .then((createdItem) => {
+            createdItem.expiredDate = new Date(createdItem.expiredDate)
+            setItems((prevItems) => [...prevItems, createdItem]);
+            setShowFoodSelectModal(false);
+            setAddItemModalVisible(false);
+             alert('Tạo thực phẩm thành công:', createdItem);
+            console.log('Fridge Item successfully added:', createdItem);
+            
+          
+        })
+            .catch((error) => {
+              alert('Tạo thực phẩm thất bại, thử lại');
+          console.error('Failed to create Fridge Item:', error);
+        });
     };
     
     const applyFilter = () => {
@@ -149,10 +200,25 @@ const StoreScreen = ({ navigation }) => {
     };
 
     const deleteSelectedItems = () => {
-        const newItems = items.filter(item => !selectedItems.includes(item.id));
-        setItems(newItems); // Cập nhật lại danh sách items sau khi xóa
-        cancelSelection(); // Hủy chế độ chọn sau khi xóa
+         Promise.all(
+            selectedItems.map(item => deleteFridgeItem(item))
+          )
+          .then(() => {
+            const newItems = items.filter(item => !selectedItems.includes(item.id));
+            setItems(newItems); 
+            cancelSelection(); 
+            console.log('Selected items deleted successfully');
+          })
+          .catch(error => {
+            console.error('Error deleting selected items:', error);
+          });
     };
+    const handleChooseFood = (food) => {
+        setAddingItem({ ...addingItem, food: food })
+    }
+    const handleChooseEditingItem = (food) => {
+        setAddingItem({ ...editedItem, food: food })
+    }
 
 
     // Filter logic for sorting and filtering items based on multiple filters
@@ -163,6 +229,9 @@ const StoreScreen = ({ navigation }) => {
         // Example selected filter, could come from your state
 
         switch (selectedFilter) {
+            case 'none':
+                filteredItems = [...items];
+                break;
             case 'quantity_desc':
                 filteredItems = filteredItems.sort((a, b) => b.quantity - a.quantity);
                 break;
@@ -170,13 +239,13 @@ const StoreScreen = ({ navigation }) => {
                 filteredItems = filteredItems.sort((a, b) => a.quantity - b.quantity);
                 break;
             case 'date_asc':
-                filteredItems = filteredItems.sort((a, b) => new Date(a.date) - new Date(b.date));
+                filteredItems = filteredItems.sort((a, b) => new Date(a.expiredDate) - new Date(b.expiredDate));
                 break;
             case 'date_desc':
-                filteredItems = filteredItems.sort((a, b) => new Date(b.date) - new Date(a.date));
+                filteredItems = filteredItems.sort((a, b) => new Date(b.expiredDate) - new Date(a.expiredDate));
                 break;
             case 'expired':
-                filteredItems = filteredItems.filter(item => item.state === "Expired");
+                filteredItems = filteredItems.filter(item => checkExpired(item.expiredDate)/1400 < 0);
                 break;
             default:
                 break;
@@ -225,11 +294,7 @@ const StoreScreen = ({ navigation }) => {
                 <View style={styles.mainBody}>
                     <View style={styles.bodyHeader}>
                         <Text style={styles.headerText}>DANH SÁCH THỰC PHẨM</Text>
-                    </View>
-                    <View style={styles.listFood}>
-                        <ScrollView style={styles.scrollViewListFood}>
-                            <View style={styles.itemHolder}>
-                                {isSelectionMode && (
+                         {isSelectionMode && (
                                     <View style={styles.cancelButtonContainer}>
                                         
                                         
@@ -252,7 +317,13 @@ const StoreScreen = ({ navigation }) => {
                                         </TouchableOpacity>
                                     </View>
                                 )}
+                    </View>
+                    <View style={styles.listFood}>
+                        <ScrollView style={styles.scrollViewListFood}>
+                            <View style={styles.itemHolder}>
+                               
                                 {filteredItems().map((item, index) => (
+                                  
                                     <TouchableOpacity 
                                         key={index} 
                                         style={styles.itemContainer} 
@@ -281,7 +352,13 @@ const StoreScreen = ({ navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            <Text style={styles.textRed}>{item.state}</Text>
+                                           {checkExpired(item.expiredDate)/1440 < 0 && 
+                                                (<Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>)
+                                            }
+                                             {checkExpired(item.expiredDate)/1440 >= 0 && checkExpired(item.expiredDate)/1440 <= 2 && 
+                                                <Text style={styles.textOrange}>SẮP HẾT HẠN</Text>
+                                            }
+                                            
                                             <Text style={styles.normalText}>Số lượng: {item.quantity}</Text>
                                             <Text style={styles.normalText}>Hết hạn: {item.expiredDate.getDate()}-{item.expiredDate.getMonth()+1}-{item.expiredDate.getFullYear()}</Text>
                                         </View>
@@ -310,46 +387,107 @@ const StoreScreen = ({ navigation }) => {
             >
                     <View style={styles.modalBackground}>
                         <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Edit Item</Text>
+                        <Text style={styles.modalTitle}>Edit Item</Text>
+                        <Text style={styles.modalTitle}>Tên</Text>
                             <TextInput
                                 style={styles.modalInput}
-                                value={editedItem.name}
-                                onChangeText={(text) => setEditedItem({ ...editedItem, name: text })}
+                                value={editedItem.foodName}
+                                onChangeText={(text) => setEditedItem({ ...editedItem, foodName: text })}
                                 placeholder="Item Name"
-                            />
+                        />
+                         <Text style={styles.modalTitle}>Số lượng</Text>
                             <TextInput
                                 style={styles.modalInput}
                                 value={editedItem.quantity?.toString()}
                                 onChangeText={(text) => setEditedItem({ ...editedItem, quantity: parseInt(text) })}
                                 placeholder="Quantity"
                                 keyboardType="numeric"
-                            />
+                        />
+                         {/* <Text style={styles.modalTitle}>Số ngày còn lại</Text>
                             <TextInput
                                 style={styles.modalInput}
-                                value={editedItem.state}
-                                onChangeText={(text) => setEditedItem({ ...editedItem, state: text })}
-                                placeholder="State"
-                            />
-                              <TouchableOpacity
+                                value={editedItem.useWithin}
+                                onChangeText={(text) => setEditedItem({ ...editedItem, useWithin: parseInt(text) })}
+                                keyboardType="numeric"
+                                placeholder="Số ngày còn lại"
+                        /> */}
+                          {/* <TextInput
+                        style={styles.modalInput}
+                        
+                        onChangeText={(text) => setEditedItem({ ...editedItem, expiredDate: text })}
+                        placeholder="Expiration Date"
+                    /> */}
+                      <TouchableOpacity
+                            style={styles.modalInput}
+                            onPress={() => setShowDatePicker(true)} // Show date picker when pressed
+                        >
+                            <Text>{editedItem.expiredDate ? editedItem.expiredDate.toLocaleString() : "Expiration Date"}</Text>
+                    </TouchableOpacity>
+                    
+                        {showDatePicker && (
+                            <DateTimePickerModal
+                                isVisible={showDatePicker}
                                 style={styles.modalInput}
-                                onPress={() => setShowDatePicker(true)} // Show date picker when pressed
+                                date={editedItem.expiredDate ? new Date(editedItem.expiredDate) : new Date()} // Ensure it's a Date object
+                                mode="datetime"
+                                //display="default"
+                                onConfirm={(date) => {
+                                    
+                                    // setShowDatePicker(false);
+                                    setEditedItem({ ...editedItem, expiredDate: date });
+                                    console.log("date   "+date);
+                                    setShowDatePicker(false);
+                                    
+                                }}
+                                onCancel={() => {
+                                    
+                                    setShowDatePicker(false);
+                                }}
+                            />
+                        )}
+                         <Text style={styles.normalText}>Note</Text>
+                            <TextInput
+                                style={styles.modalInput}
+                                value={editedItem.note}
+                                multiline={true}
+                                onChangeText={(text) => setEditedItem({ ...editedItem, note: text})}
+                                placeholder="Chú ý"
+                        />
+                         {editedItem.food &&
+                            <View style={styles.foodSelectItem}>
+                                <Image source={{ uri: editedItem.food.imageUrl }} style={styles.foodImage} />
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Text>{editedItem.food.name}</Text>
+                                    <Text >({editedItem.food.type})</Text>
+                                </View>
+                            </View>
+                        }
+                            <TouchableOpacity
+                                style={styles.addFoodButton}
+                                onPress={handleShowChooseFood}
                             >
-                                <Text>{editedItem.date ? editedItem.date.toDateString() : "Select Date"}</Text>
-                            </TouchableOpacity>
-                          
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    style={styles.modalInput}
-                                    value={editedItem.date ? new Date(editedItem.date) : new Date()} // Ensure it's a Date object
-                                    mode="date" // You can also use "time" or "datetime" based on the requirement
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        setShowDatePicker(false); // Hide date picker after selection
-                                        if (selectedDate) {
-                                            setEditedItem({ ...editedItem, date: selectedDate });
-                                        }
+                                <Text>Change Food</Text>
+                        </TouchableOpacity>
+                          {showFoodSelectModal && (
+                            <ScrollView style={styles.foodSelectModal}>
+                                <Text style={styles.foodSelectTitle}>Select a Food</Text>
+                                {listFood.map((food) => (
+                                <TouchableOpacity
+                                    key={food.id}
+                                    style={styles.foodSelectItem}
+                                    onPress={() => {
+                                    handleChooseEditingItem(food);
+                                    setShowFoodSelectModal(false); // Đóng modal khi chọn món ăn
                                     }}
-                                />
+                                >
+                                    <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                        <Text>{food.name}</Text>
+                                        <Text >({food.type})</Text>
+                                    </View>
+                                </TouchableOpacity>
+                                ))}
+                            </ScrollView>
                             )}
 
                             <View style={styles.buttonHolder}>
@@ -373,46 +511,93 @@ const StoreScreen = ({ navigation }) => {
             >
                     <View style={styles.modalBackground}>
                         <View style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Add Item</Text>
+                        <Text style={styles.modalTitle}>Add Item</Text>
+                        <Text style={styles.normalText}>Tên</Text>
                             <TextInput
                                 style={styles.modalInput}
                               
                                 onChangeText={(text) => setAddingItem({ ...addingItem, name: text })}
-                                placeholder="Item Name"
-                            />
+                                placeholder="Tên thực phẩm"
+                        />
+                        <Text style={styles.normalText}>Số lượng</Text>
                             <TextInput
                                 style={styles.modalInput}
                                
                                 onChangeText={(text) => setAddingItem({ ...addingItem, quantity: parseInt(text) })}
-                                placeholder="Quantity"
+                                placeholder="Số lượng"
                                 keyboardType="numeric"
+                        />
+                         <Text style={styles.normalText}>Hạn sử dụng</Text>
+                         <TouchableOpacity
+                            style={styles.modalInput}
+                            onPress={() => setShowDatePicker(true)} // Show date picker when pressed
+                        >
+                            <Text>{addingItem.expiredDate ? addingItem.expiredDate.toLocaleString() : "Expiration Date"}</Text>
+                    </TouchableOpacity>
+                    
+                        {showDatePicker && (
+                            <DateTimePickerModal
+                                isVisible={showDatePicker}
+                                style={styles.modalInput}
+                                date={addingItem.expiredDate ? new Date(addingItem.expiredDate) : new Date()} // Ensure it's a Date object
+                                mode="datetime"
+                                //display="default"
+                                onConfirm={(date) => {
+                                    
+                                    // setShowDatePicker(false);
+                                    setAddingItem({ ...addingItem, expiredDate: date });
+                                    console.log("date   "+date);
+                                    setShowDatePicker(false);
+                                    
+                                }}
+                                onCancel={() => {
+                                    
+                                    setShowDatePicker(false);
+                                }}
                             />
-                            {/* <TextInput
+                        )}
+                         <Text style={styles.normalText}>Note</Text>
+                            <TextInput
                                 style={styles.modalInput}
                                
-                                onChangeText={(text) => setAddingItem({ ...addingItem, date: text })}
-                                placeholder="Expiration Date"
-                            /> */}
-                              <TouchableOpacity
-                                style={styles.modalInput}
-                                onPress={() => setShowDatePicker(true)} // Show date picker when pressed
+                                onChangeText={(text) => setAddingItem({ ...addingItem, note: text})}
+                                placeholder="Chú ý"
+                            />
+                         {addingItem.food &&
+                            <View style={styles.foodSelectItem}>
+                                <Image source={{ uri: addingItem.food.imageUrl }} style={styles.foodImage} />
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Text>{addingItem.food.name}</Text>
+                                    <Text >({addingItem.food.type})</Text>
+                                </View>
+                            </View>
+                        }
+                            <TouchableOpacity
+                                style={styles.addFoodButton}
+                                onPress={handleShowChooseFood}
                             >
-                                <Text>{addingItem.date ? addingItem.date.toDateString() : "Expiration Date"}</Text>
-                            </TouchableOpacity>
-                          
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    style={styles.modalInput}
-                                    value={addingItem.date ? new Date(addingItem.date) : new Date()} // Ensure it's a Date object
-                                    mode="date" // You can also use "time" or "datetime" based on the requirement
-                                    display="default"
-                                    onChange={(event, selectedDate) => {
-                                        setShowDatePicker(false); // Hide date picker after selection
-                                        if (selectedDate) {
-                                            setAddingItem({ ...addingItem, date: selectedDate });
-                                        }
+                                <Text>Choose Food</Text>
+                        </TouchableOpacity>
+                          {showFoodSelectModal && (
+                            <ScrollView style={styles.foodSelectModal}>
+                                <Text style={styles.foodSelectTitle}>Select a Food</Text>
+                                {listFood.map((food) => (
+                                <TouchableOpacity
+                                    key={food.id}
+                                    style={styles.foodSelectItem}
+                                    onPress={() => {
+                                    handleChooseFood(food);
+                                    setShowFoodSelectModal(false); // Đóng modal khi chọn món ăn
                                     }}
-                                />
+                                >
+                                    <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
+                                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                        <Text>{food.name}</Text>
+                                        <Text >({food.type})</Text>
+                                    </View>
+                                </TouchableOpacity>
+                                ))}
+                            </ScrollView>
                             )}
                             <View style={styles.buttonHolder}>
                                 <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
@@ -505,6 +690,19 @@ const StoreScreen = ({ navigation }) => {
                                         color={selectedFilter === 'expired' ? 'blue' : 'gray'}
                                     />
                                 <Text style={styles.filterOptionText}>Đã hết hạn</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={() => setSelectedFilter('none')} 
+                            style={styles.filterOption}
+                        >
+                            <View style={styles.checkboxContainer}>
+                            <MaterialCommunityIcons
+                                        name={selectedFilter === 'none' ? 'radiobox-marked' : 'radiobox-blank'}
+                                        size={24}
+                                        color={selectedFilter === 'none' ? 'blue' : 'gray'}
+                                    />
+                                <Text style={styles.filterOptionText}>Bỏ lọc</Text>
                             </View>
                         </TouchableOpacity>
 
@@ -697,6 +895,10 @@ const styles = StyleSheet.create({
         color: "#E23131",
         fontWeight: 'bold',
     },
+    textOrange: {
+                color: "#FFA600",
+                fontWeight: 'bold',
+            },
     modalBackground: {
         flex: 1,
         justifyContent: "center",
@@ -724,6 +926,15 @@ const styles = StyleSheet.create({
     buttonHolder: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+    },
+    addFoodButton: {
+        marginTop: 48,
+        marginBottom: 12,
+        padding: 10,
+        backgroundColor: "#4CAF50",
+        borderRadius: 5,
+        alignItems: 'center',
+        textAlign: 'center',
     },
     saveButton: {
         backgroundColor: "#4EA72E",
@@ -780,6 +991,30 @@ const styles = StyleSheet.create({
     selectedOption: {
         backgroundColor: 'orange',  // Visual highlight when selected
         borderColor: 'orange',
+    },
+      foodSelectModal: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        elevation: 5,
+        padding: 10,
+        marginBottom: 50,
+    },
+    foodSelectTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    foodSelectItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+     foodImage: {
+        width: 75,
+        height: 75,
+        borderRadius: 8,
+        marginRight: 10,
+        resizeMode: 'cover',
     },
 });
 
