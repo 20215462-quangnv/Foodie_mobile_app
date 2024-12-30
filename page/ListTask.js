@@ -180,8 +180,12 @@ const TaskScreen = ({ navigation }) => {
                     <View style={styles.listFood}>
                         <ScrollView style={styles.scrollViewListFood}>
                             <View style={styles.itemHolder}>
-                               
-                                {handleShowShoppingList().map((item, index) => (
+                                {handleShowShoppingList().length == 0 &&
+                                    <View style={styles.emptyItemsHolder}>
+                                        <Text style={styles.normalText}>Bạn không có nhiệm vụ nào hôm nay</Text>
+                                        <Image style={styles.imageEmpty} source={{ uri: "https://png.pngtree.com/png-vector/20230413/ourmid/pngtree-graphic-design-elements-for-celebrations-party-popper-confetti-firecracker-logo-and-christmas-birthday-emoticon-icon-vector-png-image_50627488.jpg" }}></Image>
+                                    </View>}
+                                {handleShowShoppingList().length > 0 && handleShowShoppingList().map((item, index) => (
                                     <TouchableOpacity 
                                         key={index} 
                                         style={styles.itemContainer} 
@@ -205,7 +209,8 @@ const TaskScreen = ({ navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            <Text style={styles.textRed}>Món ăn: {item.name}</Text>
+
+                                            <Text style={styles.textRed}>Tên: {item.name}</Text>
                                             <Text style={styles.normalText}>Mô tả: {item.note}</Text>
                                             <Text style={styles.normalText}>Tạo bởi: {item.owner_id}</Text>
                                             <Text style={styles.normalText}>Created at: {item.date.toDateString()}</Text>
@@ -215,12 +220,6 @@ const TaskScreen = ({ navigation }) => {
                             </View>
                         </ScrollView>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.addButton} 
-                        onPress= {openAddItemModal}
-                    >
-                        <Icon name="plus-circle" size={48} color="#4EA72E" />   
-                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -237,6 +236,18 @@ const styles = StyleSheet.create({
     normalText: {
         fontSize: 16,
         fontFamily: colors.fontFamily,
+    },
+    emptyItemsHolder: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+    },
+    imageEmpty: {
+        alignContent: 'center',
+        flex: 1,
+        width: 200,
+        height: 200,
     },
     container: {
         flex: 1, 
@@ -256,6 +267,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5,
         flexDirection: 'row',
+        justifyContent: 'center',
     },
     titleText: {
         fontSize: 24,

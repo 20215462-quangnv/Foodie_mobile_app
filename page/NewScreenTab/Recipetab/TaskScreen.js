@@ -84,8 +84,8 @@ const TaskDetailsScreen = ({ route, navigation }) => {
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            <Text style={styles.itemText}>{item.foodName}</Text>
-                                            <Text style={styles.normalText}>Mô tả: {item.quantity}</Text>
+                                            <Text style={[styles.itemText, item.done && styles.doneText]}>{item.foodName}</Text>
+                                            <Text style={[styles.normalText, , item.done && styles.doneText]}>Số lượng: {item.quantity}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -100,14 +100,18 @@ const TaskDetailsScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+    doneText: {
+        textDecorationLine: 'line-through',
+    },
     headerText: {
-        fontSize: 16,
+        fontSize: 31,
         fontWeight: 'bold',
-        color: 'black',
+        color: 'white',
     },
     normalText: {
         fontSize: 16,
         fontFamily: colors.fontFamily,
+        padding: 10,
     },
     container: {
         flex: 1, 
@@ -176,9 +180,14 @@ const styles = StyleSheet.create({
         width: "100%", 
     },
     bodyHeader: {
-        alignItems: "center",
+        alignItems: 'flex-end',
+        paddingTop: 20,
         paddingBottom: 10,
         flex: 0.5,
+        backgroundColor: colors.themeColor,
+        flexDirection: 'row',
+        justifyContent: 'center',
+
     },
     listFood: {
         flex: 4,
@@ -216,10 +225,11 @@ const styles = StyleSheet.create({
         // borderColor: "#000", 
     },
     itemText: {
-        textAlign: 'center',
+        textAlign: 'left',
         padding: 10,
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: "bold",
+        fontFamily: colors.fontFamily,
     },
     deleteButton: {
         backgroundColor: '#ff5722',
@@ -269,7 +279,8 @@ const styles = StyleSheet.create({
     leftItem: {
         flex: 2,
         overflow: 'hidden',
-        flexDirection: "column",
+        flexDirection: "row",
+        alignItems: 'center'
     },
     rightItem: {
         flex: 3,
@@ -410,7 +421,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: 10,
+        top: 20,
         left: 10,
         width: 50,
         padding: 10,

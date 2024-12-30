@@ -1,6 +1,5 @@
 import { getToken } from "./AuthController";
-import { getUserProfile } from "./UserController";
-
+import { getUserFromStorage } from "./UserController";
 const API_URL = "http://192.168.0.6:8080/api/user/food";
 
 const getBearerAuth = async () => {
@@ -101,9 +100,9 @@ async function getFoodsByGroupId(groupId) {
 
 async function getAllFoodByGroup() {
   try {
-      const userProfile = await getUserProfile();
+      const userProfile = await getUserFromStorage();
       console.log(userProfile);
-      const groupIds = userProfile.data.groupIds;  // Lấy danh sách groupIds từ user profile
+      const groupIds = userProfile.groupIds;  // Lấy danh sách groupIds từ user profile
       console.log(groupIds); 
       const allGroups = await Promise.all(
           groupIds.map(groupId => getFoodsByGroupId(groupId))

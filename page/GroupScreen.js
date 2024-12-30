@@ -99,7 +99,7 @@ const UpdateGroupModalContent = memo(
 );
 
 const GroupScreen = ({ route }) => {
-  const { groupId } = route.params; // Get groupId from route params
+  const { groupId, groups, setGroups } = route.params; // Get groupId from route params
   const [group, setGroup] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -233,6 +233,7 @@ const GroupScreen = ({ route }) => {
           try {
             const result = await deleteGroup(groupId);
             console.log("Delete group result:", result); // Log the result
+            setGroups(groups.filter(group => group.id !== groupId));
             Alert.alert("Success", "Group deleted successfully", [
               {
                 text: "OK",

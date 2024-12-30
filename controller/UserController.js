@@ -67,4 +67,27 @@ async function getUserByEmail(email) {
   }
 }
 
-export { getUserProfile, getUserFromStorage, getUserByEmail };
+async function getAllUser() {
+  try {
+    const bearerAuth = await getBearerAuth();
+    const response = await fetch(`${API_URL}/getAll`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,
+      },
+    });
+
+    if (response.ok) {
+      const usersData = await response.json(); 
+      return usersData;
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error fetching all User:', error);
+    throw error;
+  }
+}
+
+export { getUserProfile, getUserFromStorage, getUserByEmail, getAllUser };

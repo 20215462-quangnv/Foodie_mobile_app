@@ -22,7 +22,6 @@ import {
 import { getAllUnit } from "../../../controller/measureUnitController";
 import { Picker } from '@react-native-picker/picker';
 import { getAllCategory } from "../../../controller/FoodCategoryController";
-import { getUserProfile } from "../../../controller/UserController";
 
 
 const GroupFoodScreen = ({ route, navigation }) => {
@@ -38,8 +37,8 @@ const GroupFoodScreen = ({ route, navigation }) => {
   useEffect(() => {
       async function fetchData() {
         try {
-          const data = await getUserProfile();  
-          setUser(data.data)
+          const data = await getUserFromStorage();  
+          setUser(data)
         } catch (error) {
           setError('Error fetching recipes');
         }

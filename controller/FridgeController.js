@@ -1,5 +1,5 @@
 import { getToken } from "../controller/AuthController";
-import { getUserProfile } from "./UserController";
+import { getUserFromStorage } from "./UserController";
 const API_URL = "http://192.168.0.6:8080/api/fridge";
 
 const getBearerAuth = async () => {
@@ -35,8 +35,8 @@ async function getFridgeGroup(groupId) {
 async function getAllFridgeGroup() {
   try {
     const bearerAuth = await getBearerAuth();
-    const userProfile = await getUserProfile();
-    const groupIds = userProfile.data.groupIds;
+    const userProfile = await getUserFromStorage();
+    const groupIds = userProfile.groupIds;
     console.log(groupIds);
     const allGroups = await Promise.all(
       groupIds.map((groupId) => getFridgeGroup(groupId, bearerAuth))

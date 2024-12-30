@@ -39,7 +39,7 @@ const ChatScreen = () => {
   const renderGroup = ({ item }) => (
     <TouchableOpacity
       style={styles.groupCard}
-      onPress={() => navigation.navigate("GroupScreen", { groupId: item.id })}
+      onPress={() => navigation.navigate("GroupScreen", { groupId: item.id, groups : groups, setGroups: setGroups })}
     >
       <View style={styles.groupInfo}>
         <Icon name="users" size={24} color="#4EA72E" style={styles.groupIcon} />

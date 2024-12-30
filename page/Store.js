@@ -19,13 +19,15 @@ import { getUserFromStorage } from "../controller/UserController.js";
 import {getAllFridgeGroup, createFridgeItem, updateFridgeItem, deleteFridgeItem} from "../controller/FridgeController.js" 
 
 const StoreScreen = ({ navigation }) => {
-    const checkExpired = (expiredDate) => {
+  const checkExpired = (expiredDate) => {
         const today = new Date();
-        const timeDifference = expiredDate - today;
-        const daysLeft = timeDifference / (1000 * 60);
-        console.log("expire: "+ expiredDate);
+        const expiredDateObj = new Date(expiredDate);  // Chuyển chuỗi expiredDate thành Date object
+        const timeDifference = expiredDateObj - today;  // Trừ giữa hai Date objects
+        const daysLeft = timeDifference / (1000 * 60);  // Chia cho số mili giây trong một ngày
+        console.log("expire: " + daysLeft);
         return daysLeft;
     };
+
 
     const [items, setItems] = useState([]);
     const [userProfile, setUserProfile] = useState({});
@@ -112,22 +114,27 @@ const StoreScreen = ({ navigation }) => {
             useWithin: checkExpired(editedItem.expiredDate),
             note: editedItem.note,
             foodId: editedItem.food.id,
-            ownerId:  userProfile.id,
+            // ownerId:  userProfile.id,
          };
-        console.log("edit within: " + newItem.useWithin);
-        // updateFridgeItem(editedItem.id, newItem)
-        //     .then((update) => {
-        //     update.expiredDate = new Date(update.expiredDate)
-        //     setItems((prevItems) => [...prevItems, update]);
-        //     setShowFoodSelectModal(false);
-        //     setModalVisible(false);
-        //     alert('Update thực phẩm thành công:', update);
-        //     console.log('Fridge Item successfully added:', update);
-        // })
-        //     .catch((error) => {
-        //       alert('Update thực phẩm thất bại, thử lại');
-        //   console.error('Failed to create Fridge Item:', error);
-        // });
+        console.log("edit within: " + newItem.foodId);
+        updateFridgeItem(editedItem.id, newItem)
+            .then((update) => {
+            update.expiredDate = new Date(update.expiredDate)
+            setItems((prevItems) => 
+                prevItems.map((item) => 
+                    item.id === update.id ? update : item  // Nếu id trùng thì thay bằng update, nếu không giữ nguyên item
+                )
+                );
+
+            setShowFoodSelectModal(false);
+            setModalVisible(false);
+            alert('Update thực phẩm thành công:', update);
+            console.log('Fridge Item successfully added:', update);
+        })
+            .catch((error) => {
+              alert('Update thực phẩm thất bại, thử lại');
+          console.error('Failed to create Fridge Item:', error);
+        });
     };
     const handleSaveAddedItem = () => {
         
@@ -140,21 +147,21 @@ const StoreScreen = ({ navigation }) => {
             ownerId:  userProfile.id,
         };
         console.log (newItem.useWithin);
-        // createFridgeItem(newItem)
-        //     .then((createdItem) => {
-        //     createdItem.expiredDate = new Date(createdItem.expiredDate)
-        //     setItems((prevItems) => [...prevItems, createdItem]);
-        //     setShowFoodSelectModal(false);
-        //     setAddItemModalVisible(false);
-        //      alert('Tạo thực phẩm thành công:', createdItem);
-        //     console.log('Fridge Item successfully added:', createdItem);
+        createFridgeItem(newItem)
+            .then((createdItem) => {
+            createdItem.expiredDate = new Date(createdItem.expiredDate)
+            setItems((prevItems) => [...prevItems, createdItem]);
+            setShowFoodSelectModal(false);
+            setAddItemModalVisible(false);
+             alert('Tạo thực phẩm thành công:', createdItem);
+            console.log('Fridge Item successfully added:', createdItem);
             
           
-        // })
-        //     .catch((error) => {
-        //       alert('Tạo thực phẩm thất bại, thử lại');
-        //   console.error('Failed to create Fridge Item:', error);
-        // });
+        })
+            .catch((error) => {
+              alert('Tạo thực phẩm thất bại, thử lại');
+          console.error('Failed to create Fridge Item:', error);
+        });
     };
     
     const applyFilter = () => {
@@ -400,7 +407,7 @@ const StoreScreen = ({ navigation }) => {
                          <Text style={styles.modalTitle}>Số lượng</Text>
                             <TextInput
                                 style={styles.modalInput}
-                                value={editedItem.quantity?.toString()}
+                                value={editedItem.quantity}
                                 onChangeText={(text) => setEditedItem({ ...editedItem, quantity: parseInt(text) })}
                                 placeholder="Quantity"
                                 keyboardType="numeric"

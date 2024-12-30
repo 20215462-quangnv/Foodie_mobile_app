@@ -115,7 +115,7 @@ const HomeScreen = ({ navigation })=> {
         {/* Body */}
         <View style={styles.body}>
             <View style={styles.mainBody}>
-                <View style={styles.listNote}>
+                {/* <View style={styles.listNote}>
 
                     <View style={styles.hasList}>
                         <Text style={styles.headerText}>
@@ -130,7 +130,7 @@ const HomeScreen = ({ navigation })=> {
                             ))}
                         </ScrollView>
                     </View>
-                </View>
+                </View> */}
                 <View style={styles.suggestDish}>
                     <Text style={styles.headerText}>
                         Dựa theo tủ của bạn
