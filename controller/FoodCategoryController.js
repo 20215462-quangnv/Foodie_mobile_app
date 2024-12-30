@@ -1,7 +1,7 @@
 import { getToken } from "./AuthController";
 import { getUserProfile } from "./UserController";
 
-const API_URL = "http://192.168.43.107:8080/api/admin/category";
+const API_URL = "http://192.168.0.6:8080/api/admin/category";
 
 const getBearerAuth = async () => {
   const token = await getToken();
