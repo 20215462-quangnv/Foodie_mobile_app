@@ -12,147 +12,44 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { getAllRecipes, createRecipe, deleteRecipe } from '../controller/RecipeController';
-import { getUserFromStorage } from "../controller/UserController.js";
 import { colors } from "./styles/RootStyle.js";
-import { FoodContext } from "../controller/FoodProviderContext.js";
-import WeekCalendar from "./NewScreenTab/Recipetab/Calender.js";
-import { getAllShoppingList } from "../controller/ShoppingController.js";
+import { updateTask } from "../../../controller/ShoppingController.js";
 
 
-const TaskScreen = ({ navigation }) => {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [addingItem, setAddingItem] = useState({});
-    const [isSelectionMode, setIsSelectionMode] = useState(false); 
-    const [selectedItems, setSelectedItems] = useState(null);
-    const [showFoodSelectModal, setShowFoodSelectModal] = useState(false); 
-    const { listFood, loading } = useContext(FoodContext);
-    const [items, setItems] = useState([]);
-
-    const [user, setUser] = useState({});
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const user = await getUserFromStorage(); 
-                setUser(user);
-                console.log(user);
-
-                const data = await getAllShoppingList();  // Chờ kết quả từ API
-                setItems(data.data.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    note: item.note,
-                    date: new Date(item.date),
-                    details: item.details,
-                    owner_id: item.owner_id,
-                    belong_to_group_id: item.belong_to_group_id,
-                })));
-              
-                console.log(items);
-          } catch (error) {
-            setError('Error fetching recipes');  
-          }
-        }
-        
-        fetchData();  
-    }, []);  
-
-    const openFilterModal = () => {
-        setFilterModalVisible(true);
-    };
-
-    const openAddItemModal = () => {
-        setAddItemModalVisible(true);
-        setAddingItem({});
-    };
-    const handleChooseFood = (food) => {
-        setAddingItem({ ...addingItem, food: food })
-    }
-
-    const handleLongPress = (item) => {
-        setIsSelectionMode(true); 
-        setSelectedItems([item.id]); 
-    };
+const TaskScreen = ({ route, navigation }) => {
+    
+    const { items } = route.params;
+    
+   
     const handlePress = (item) => {
-        navigation.navigate('EditRecipe', {items : item.details});
-    };
-    const toggleSelectItem = (itemId) => {
-        setSelectedItems((prevSelected) => {
-        if (prevSelected.includes(itemId)) {
-            return prevSelected.filter((id) => id !== itemId); 
-        } else {
-            return [...prevSelected, itemId]; 
+        item.done = !item.done;
+        const body ={
+            foodId: item.id,
+            quantity: item.quantity,
+            done: item.done,
         }
-        });
+      updateTask(item.id, body)
+      .then((updatedTask) => {
+        console.log('Item successfully update:', updatedTask);
+      })
+      .catch((error) => {
+        // Nếu thất bại, log lỗi và hiển thị thông báo
+        console.error('Failed to update recipe:', error);
+      });
     };
-    const selectAllItems = () => {
-        if (selectedItems.length === items.length) {
-            setSelectedItems([]);
-        } else {
-            setSelectedItems(items.map(item => item.id)); 
-        }
-    };
-    const cancelSelection = () => {
-        setIsSelectionMode(false);
-        setSelectedItems([]);
-    };
-
-    const handleDeleteSelectedItems = () => {
-        console.log("selectedItems "+  selectedItems);
-        Promise.all(
-            selectedItems.map(item => deleteRecipe(item))
-          )
-          .then(() => {
-            const newItems = items.filter(item => !selectedItems.includes(item.id));
-            setItems(newItems); 
-            cancelSelection(); 
-            console.log('Selected items deleted successfully');
-          })
-          .catch(error => {
-            console.error('Error deleting selected items:', error);
-          });
-    };
-
-
-  const handleShowChooseFood = () => {
-    if (showFoodSelectModal) {
-      setShowFoodSelectModal(false);
-    }
-    else setShowFoodSelectModal(true);
+    const handleBack = () => {
+     navigation.navigate('Task');
   }
-    
-    
-    const handleShowShoppingList = (day) => {
-        const res = [];
-        for (const i of items) {
-            if (
-                items[i].getFullYear() === day.getFullYear() &&
-                items[i].getMonth() === day.getMonth() &&
-                items[i].getDate() === day.getDate()
-            ) {
-                res.push(items[i]);
-            } 
-        }
-        return res;
-    }
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <View style={styles.title}>
-                    <Image source={{ uri: user.photoUrl }}
-                        style={styles.imageWarning}
-                        onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}></Image>
-                    <Text style={styles.titleText}>{user.fullName}</Text>
-                </View>
-               <WeekCalendar style={styles.calender}/>
-            </View>
-
             {/* Body */}
             <View style={styles.body}>
                 <View style={styles.mainBody}>
                     <View style={styles.bodyHeader}>
-                        <Text style={styles.headerText}>Danh sách nhiệm vụ</Text>
+                         <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+                            <Icon name="arrow-left" size={30} color="black" />
+                        </TouchableOpacity>
+                        <Text style={styles.headerText}>Tasks</Text>
                          {isSelectionMode && (
                                     <View style={styles.cancelButtonContainer}>
                                         <TouchableOpacity
@@ -179,7 +76,7 @@ const TaskScreen = ({ navigation }) => {
                         <ScrollView style={styles.scrollViewListFood}>
                             <View style={styles.itemHolder}>
                                
-                                {handleShowShoppingList(new Date()).map((item, index) => (
+                                {items.map((item, index) => (
                                     <TouchableOpacity 
                                         key={index} 
                                         style={styles.itemContainer} 
@@ -187,26 +84,29 @@ const TaskScreen = ({ navigation }) => {
                                         
                                     >
                                         <View style={styles.leftItem}>
-                                            {isSelectionMode && (
+                                            {(
                                                 <TouchableOpacity
                                                     style={styles.checkboxContainer}
                                                     onPress={() => toggleSelectItem(item.id)}
                                                 >
                                                 <MaterialCommunityIcons
-                                                    name={selectedItems.includes(item.id) ? 'checkbox-marked' : 'checkbox-blank-outline'}
+                                                    name={item.done == "true" ? 'checkbox-marked' : 'checkbox-blank-outline'}
                                                     size={24}
                                                     color="black"
                                                 />
                                                 </TouchableOpacity>
                                             )}
-                                            <Text style={styles.itemText}>{item.name}</Text>
+                                             <Image
+                                                source={{ uri: item.foodImage }}
+                                                style={styles.imageWarning}
+                                                onError={(e) => console.log("Error loading image: ", e.nativeEvent.error)}
+                                            />
+                                            
                                         </View>
 
                                         <View style={styles.rightItem}>
-                                            <Text style={styles.textRed}>Món ăn: {item.name}</Text>
-                                            <Text style={styles.normalText}>Mô tả: {item.note}</Text>
-                                            <Text style={styles.normalText}>Tạo bởi: {item.owner_id}</Text>
-                                            <Text style={styles.normalText}>Created at: {item.date.toDateString()}</Text>
+                                            <Text style={styles.itemText}>{item.foodName}</Text>
+                                            <Text style={styles.normalText}>Mô tả: {item.quantity}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}

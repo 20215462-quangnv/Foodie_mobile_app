@@ -39,5 +39,34 @@ function getAllShoppingList() {
   });
 }
 
+function updateTask(taskId, updatedTask) {
+  console.log('Id   :', taskId); 
+  return getBearerAuth().then(bearerAuth => {
+    return fetch(`${API_URL}/${taskId}`, {
+      method: 'PUT',  
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': bearerAuth,      
+      },
+      body: JSON.stringify(updatedTask),  
+    })
+    .then(response => {
+      if (response.ok) {
+        console.log(response);
+        return response.json();  
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    })
+    .then(data => {
+      console.log('Task updated:', data);  
+      return data.data;
+    })
+    .catch(error => {
+      console.error('Error updating task:', error); 
+    });
+  });
+}
 
-export { getAllShoppingList };
+
+export { getAllShoppingList, updateTask };

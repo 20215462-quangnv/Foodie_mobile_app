@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import moment from 'moment';
 
-const WeekCalendar = () => {
+const WeekCalendar = (handleShowShoppingList) => {
   const [weeks, setWeeks] = useState([]);
   const flatListRef = useRef(null);
 
@@ -48,9 +48,10 @@ const WeekCalendar = () => {
           ]}
           >
             <Text style={[styles.dayText]}>{day.format('ddd')}</Text>
-            <View style={[styles.dateContainer, moment().isSame(day, 'day') && styles.todayDay,]}>
+          <TouchableOpacity style={[styles.dateContainer, moment().isSame(day, 'day') && styles.todayDay,]}
+          onPress ={() => handleShowShoppingList(day)}>
                   <Text style={[styles.dayText, , moment().isSame(day, 'day') && styles.todayDayText]}>{day.format('D')}</Text>
-            </View>
+            </TouchableOpacity>
           
         </View>
       ))}
