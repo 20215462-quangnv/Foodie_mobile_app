@@ -173,6 +173,10 @@ const GroupScreen = ({ route }) => {
     }
   };
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  }
+
   const handleUpdateSubmit = useCallback(
     async (name, description) => {
       console.log("=== Update Group Submit Debug Logs ===");
@@ -476,6 +480,9 @@ const GroupScreen = ({ route }) => {
         <View style={styles.groupHeader}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
+              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+                <Icon name="arrow-left" size={30} color="white" />
+              </TouchableOpacity>
               <Text style={styles.groupName}>{group.name}</Text>
               <Text style={styles.groupDescription}>{group.description}</Text>
             </View>
@@ -524,15 +531,30 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 40 : 60,
     marginBottom: 15,
   },
+  // groupName: {
+  //   color: "#fff",
+  //   fontSize: 28,
+  //   fontWeight: "bold",
+  // },
+  // groupDescription: {
+  //   color: "#fff",
+  //   fontSize: 20,
+  //   marginTop: 5,
+  //   opacity: 0.9,
+  // },
   groupName: {
-    color: "#fff",
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
+    bottom: 25,
+    color: "#fff",
+    textAlign: "center", // Căn giữa văn bản
   },
   groupDescription: {
-    color: "#fff",
     fontSize: 20,
-    marginTop: 5,
+    color: "#fff",
+    textAlign: "center", // Căn giữa văn bản
+    marginTop: 4,
+    bottom: 25,
     opacity: 0.9,
   },
   bubbleContainer: {
@@ -612,6 +634,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 10,
   },
+
   headerButtons: {
     flexDirection: "row",
     alignItems: "center",
@@ -716,6 +739,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  backButton: {
+    top: 10
   },
 });
 

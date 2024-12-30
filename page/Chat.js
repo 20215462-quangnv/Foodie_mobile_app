@@ -56,7 +56,7 @@ const ChatScreen = ({ navigation, route }) => {
 
       <FlatList
         data={filteredGroups}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={renderGroup}
         contentContainerStyle={styles.list}
         ListEmptyComponent={

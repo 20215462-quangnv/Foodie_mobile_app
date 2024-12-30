@@ -47,11 +47,21 @@ const GroupManagementScreen = ({ route, navigation }) => {
     },
   ];
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Group Management</Text>
         <Text style={styles.headerSubtitle}>Select an option to manage</Text>
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={handleGoBack}
+        >
+          <Icon name="times" size={35} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView}>
@@ -90,6 +100,13 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     paddingHorizontal: 20,
     backgroundColor: "#4EA72E",
+    position: 'relative'
+  },
+  headerButton: {
+    position: 'absolute',
+    right: 20,
+    top: Platform.OS === "android" ? 40 : 60,
+    padding: 8
   },
   headerTitle: {
     fontSize: 22,
