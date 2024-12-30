@@ -1,4 +1,4 @@
-import { getToken, setToken } from "../controller/AuthController";
+import { getToken } from "../controller/AuthController";
 const API_URL = "http://10.0.2.2:8080/api/recipe";
 
 // Hàm để lấy Bearer token
