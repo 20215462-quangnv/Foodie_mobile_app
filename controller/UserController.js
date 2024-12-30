@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getToken } from "./AuthController";
 
 const BASE_URL = "http://10.0.2.2:8080/api/user";
@@ -7,30 +8,39 @@ const getBearerAuth = async () => {
   return `Bearer ${token}`;
 };
 
+const getUserFromStorage = async () => {
+  try {
+    const userProfile = await AsyncStorage.getItem("userProfile");
+    return userProfile ? JSON.parse(userProfile) : null;
+  } catch (error) {
+    console.error("Error retrieving user profile from storage:", error);
+    return null;
+  }
+};
+
 // Get user profile
 async function getUserProfile() {
-  const bearerAuth = await getBearerAuth();
-  return fetch(`${BASE_URL}/profile`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: bearerAuth,
-    },
-  })
-    .then(async (response) => {
-      const responseData = await response.json();
-      console.log("Response Status:", response.status);
-      console.log("Response Data:", JSON.stringify(responseData, null, 2));
-
-      if (response.ok) {
-        return responseData;
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    })
-    .catch((error) => {
-      console.error("Error fetching user profile:", error);
-      throw error;
+  try {
+    const bearerAuth = await getBearerAuth();
+    const response = await fetch(`${BASE_URL}/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
     });
+
+    if (response.ok) {
+      const userData = await response.json();
+      await AsyncStorage.setItem("userProfile", JSON.stringify(userData.data));
+      return userData;
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
 }
 
 // Update user profile
@@ -136,6 +146,29 @@ async function searchUsers(query) {
     });
 }
 
+async function getUserByEmail(email) {
+  try {
+    const bearerAuth = await getBearerAuth();
+    const response = await fetch(`${BASE_URL}/search-user?email=${email}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      return userData;
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
+}
+
 // Get user report by day
 async function getUserReport(day) {
   const bearerAuth = await getBearerAuth();
@@ -182,6 +215,8 @@ async function getAllUsers() {
 
 export {
   getUserProfile,
+  getUserFromStorage,
+  getUserByEmail,
   updateUserProfile,
   updateProfilePhoto,
   changePassword,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import {
 } from "../controller/FridgeController";
 import { getAllRecipes } from "../controller/RecipeController";
 import { getUserProfile } from "../controller/UserController";
-
+import { FoodContext } from "../controller/FoodProviderContext";
 const HomeScreen = ({ navigation }) => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [recipeItems, setRecipeItems] = useState([]);
@@ -64,7 +64,6 @@ const HomeScreen = ({ navigation }) => {
               return item.data.map((subItem) => ({
                 foodName: subItem.foodName,
                 quantity: subItem.quantity,
-                useWithin: subItem.useWithin,
                 note: subItem.note,
                 foodId: subItem.foodId,
                 ownerId: subItem.ownerId,
@@ -102,16 +101,16 @@ const HomeScreen = ({ navigation }) => {
   const checkExpired = (expiredDate) => {
     const today = new Date();
     const expirationDate = new Date(expiredDate);
-
-    today.setHours(0, 0, 0, 0);
-    expirationDate.setHours(0, 0, 0, 0);
-
     const timeDifference = expirationDate - today;
     const daysLeft = timeDifference / (1000 * 3600 * 24);
 
     return daysLeft;
   };
 
+  const { listFood, loading } = useContext(FoodContext);
+  const handleShowEditRecipe = (item) => {
+    navigation.navigate("EditRecipe", { editedItem: item, listFood: listFood });
+  };
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -146,18 +145,101 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.hasList}>
               <Text style={styles.headerText}>DANH SÁCH HIỆN CÓ</Text>
               <ScrollView style={styles.scrollView}>
-                {Array.from(
-                  { length: 5 },
-                  (
-                    _,
-                    i //Todo list
-                  ) => (
-                    <View key={i} style={styles.item}>
-                      <Text style={styles.dateItem}>Item {i + 1}</Text>
-                      <Text style={styles.contentItem}>Item {i + 1}</Text>
+                <View>
+                  {Array.from(
+                    { length: 5 },
+                    (
+                      _,
+                      i //Todo list
+                    ) => (
+                      <View key={i} style={styles.item}>
+                        <Text style={styles.dateItem}>Item {i + 1}</Text>
+                        <Text style={styles.contentItem}>Item {i + 1}</Text>
+                      </View>
+                    )
+                  )}
+                </View>
+                <View style={styles.suggestDish}>
+                  <Text style={styles.headerText}>Dựa theo tủ của bạn</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {recipeItems.map((item, i) => (
+                      <TouchableOpacity
+                        key={i}
+                        style={styles.itemSuggest}
+                        onPress={() => handleShowEditRecipe(item)}
+                      >
+                        <Text style={styles.titleSuggest}>{item.name}</Text>
+                        <Image
+                          source={{
+                            uri: item.food.imageUrl,
+                          }}
+                          style={styles.imageSuggest}
+                          onError={(e) =>
+                            console.log(
+                              "Error loading image: ",
+                              e.nativeEvent.error
+                            )
+                          }
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+                <View style={styles.warning}>
+                  <ScrollView style={styles.scrollViewWarning}>
+                    <View style={styles.itemHolder}>
+                      {fridgeItems.map((item, index) => {
+                        const daysLeft = checkExpired(item.expiredDate);
+
+                        if (daysLeft > 2) {
+                          return null;
+                        }
+
+                        return (
+                          <View key={index} style={styles.itemContainer}>
+                            <View style={styles.leftItem}>
+                              <Image
+                                source={{
+                                  uri: item.food.imageUrl,
+                                }}
+                                style={styles.imageWarning}
+                                onError={(e) =>
+                                  console.log(
+                                    "Error loading image: ",
+                                    e.nativeEvent.error
+                                  )
+                                }
+                              />
+                              <Text style={styles.itemText}>
+                                {item.foodName}
+                              </Text>
+                            </View>
+
+                            <View style={styles.rightItem}>
+                              {daysLeft < 0 && (
+                                <Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>
+                              )}
+                              {daysLeft >= 0 && daysLeft <= 2 && (
+                                <Text style={styles.textOrange}>
+                                  SẮP HẾT HẠN
+                                </Text>
+                              )}
+
+                              <Text style={styles.normalText}>
+                                Số lượng: {item.quantity}
+                              </Text>
+                              <Text style={styles.normalText}>
+                                Hết hạn: {item.expiredDate.getDate()}-
+                                {item.expiredDate.getMonth() + 1}-
+                                {item.expiredDate.getFullYear()}
+                              </Text>
+                            </View>
+                          </View>
+                        );
+                      })}
                     </View>
-                  )
-                )}
+                  </ScrollView>
+                </View>
               </ScrollView>
             </View>
           </View>

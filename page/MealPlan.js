@@ -21,12 +21,18 @@ import {
 } from "../controller/MealPlanController";
 import { getToken } from "../controller/AuthController";
 import { useNavigation } from "@react-navigation/native";
-
+import { getUserFromStorage } from "../controller/UserController";
 const MealPlannerScreen = () => {
   const navigation = useNavigation();
   const getBearerAuth = async () => {
     const token = await getToken(); // Lấy token từ AsyncStorage
     return `Bearer ${token}`; // Trả về chuỗi Bearer token
+  };
+
+  //const [groupId, setGroupId] = useState({});
+  const getUserGroupList = async () => {
+    const user = await getUserFromStorage(); // Lấy token từ AsyncStorage
+    return user.groupIds; // Trả về chuỗi Bearer token
   };
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -47,12 +53,13 @@ const MealPlannerScreen = () => {
   };
 
   const fetchMealPlan = async () => {
+    const userGroupIds = await getUserGroupList();
     try {
       setLoading(true);
       setError(null);
       // await fetchGroup();
       // const formattedDate = date.toISOString().split('T')[0];
-      const data = await getAllMealPlan(listGroup);
+      const data = await getAllMealPlan(userGroupIds);
       const sortedData = data.data.sort(
         (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
       );
@@ -72,13 +79,16 @@ const MealPlannerScreen = () => {
     try {
       const bearerAuth = await getBearerAuth();
       setLoading(true);
-      const response = await fetch("http://10.0.2.2:8080/api/user/group/all", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: bearerAuth,
-        },
-      });
+      const response = await fetch(
+        "http://192.168.43.107:8080/api/user/group/all",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: bearerAuth,
+          },
+        }
+      );
       const json = await response.json();
       console.log(json);
       let groups = [];
@@ -140,12 +150,11 @@ const MealPlannerScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (alreadyFetchGroup) {
-      fetchMealPlan().then((data) => {
-        organizeMealPlans(data);
-      });
-    }
-  }, [alreadyFetchGroup]);
+    fetchMealPlan().then((data) => {
+      organizeMealPlans(data);
+      console.log("dayadsdvdsfb fxg: " + data);
+    });
+  }, []);
 
   useEffect(() => {
     const map = listGroup.reduce((acc, group) => {

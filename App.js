@@ -12,9 +12,11 @@ import ChatScreen from "./page/Chat";
 import HomeScreen from "./page/Home";
 import StoreScreen from "./page/Store";
 import RecipeScreen from "./page/Recipe";
+import TaskScreen from "./page/ListTask";
 import LoginScreen from "./page/Login";
 import Footer from "./layout/Footer"; // Import Footer component
 import EditRecipeScreen from "./page/NewScreenTab/Recipetab/EditRecipeScreen";
+import { FoodProvider } from "./controller/FoodProviderContext";
 import MealPlannerScreen from "./page/MealPlan";
 import CreateMealPlan from "./page/NewScreenTab/mealPlanTab/CreateNewPlanScreen";
 import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
@@ -24,33 +26,35 @@ import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
 import ProfileScreen from "./page/ProfileScreen";
 import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen";
 import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
-
+import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 const Stack = createStackNavigator();
 
 const App = () => {
   const [showFooter, setShowFooter] = React.useState(false);
 
   return (
-    <NavigationContainer
-      onStateChange={(state) => {
-        if (state) {
-          const currentRoute = state.routes[state.index].name;
-          setShowFooter(currentRoute !== "Login"); // Chỉ ẩn Footer trên màn Login
-        }
-      }}
-    >
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={
-            Platform.OS === "android" ? "transparent" : undefined
+    <FoodProvider>
+      <NavigationContainer
+        onStateChange={(state) => {
+          if (state) {
+            const currentRoute = state.routes[state.index].name;
+            setShowFooter(currentRoute !== "Login"); // Chỉ ẩn Footer trên màn Login
           }
-          translucent={Platform.OS === "android"}
-        />
-        <RootNavigator />
-        {showFooter && <Footer />}
-      </SafeAreaView>
-    </NavigationContainer>
+        }}
+      >
+        <SafeAreaView style={styles.container}>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={
+              Platform.OS === "android" ? "transparent" : undefined
+            }
+            translucent={Platform.OS === "android"}
+          />
+          <RootNavigator />
+          {showFooter && <Footer />}
+        </SafeAreaView>
+      </NavigationContainer>
+    </FoodProvider>
   );
 };
 
@@ -66,10 +70,20 @@ const RootNavigator = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Recipe" component={RecipeScreen} />
       <Stack.Screen name="Store" component={StoreScreen} />
-      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen
+        name="Home"
+        options={{ headerShown: false }}
+        component={(props) => (
+          <FoodProvider>
+            <HomeScreen {...props} />
+          </FoodProvider>
+        )}
+      />
+      <Stack.Screen name="Task" component={TaskScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="Plan" component={MealPlannerScreen} />
       <Stack.Screen name="EditRecipe" component={EditRecipeScreen} />
+      <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
       <Stack.Screen
         name="CreateMealPlan"
         component={CreateMealPlan}

@@ -10,6 +10,8 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "./styles/RootStyle";
 import { Login } from "../controller/AuthController";
+import { getUserProfile } from "../controller/UserController";
+
 
 const LoginScreen = ({navigation}) => {
 
@@ -26,7 +28,7 @@ const LoginScreen = ({navigation}) => {
       const data = await Login(email, password, navigation);
       if (data?.token) {
         console.log("Login successful:", data);
-        
+        const userProfile = await getUserProfile();
       } else {
         alert("Login failed! Please check your credentials.");
       }

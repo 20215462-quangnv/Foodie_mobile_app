@@ -5,7 +5,7 @@ export const colors = {
     warning: "#f1c40f",
     fontFamily: 'Roboto',
 
-    
+    themeColor: "#ccc",
     background: "#fff",
     text: "#2c3e50",
     subtext: "#666",

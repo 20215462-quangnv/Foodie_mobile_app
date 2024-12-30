@@ -96,7 +96,7 @@ const getAllMealPlan = async (listGroup) => {
   try {
     const bearerAuth = await getBearerAuth();
     const queryString = listGroup
-      .map((group) => `groupIds=${group.id}`)
+      .map((id) => `groupIds=${id}`)
       .join("&");
     const endpoint = `${API_URL}/groups?${queryString}`;
 
