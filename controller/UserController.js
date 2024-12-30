@@ -114,52 +114,6 @@ async function changePassword(passwordData) {
   }
 }
 
-// Send notification
-async function sendNotification(notificationData) {
-  const bearerAuth = await getBearerAuth();
-  return fetch(`${BASE_URL}/send-notification`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: bearerAuth,
-    },
-    body: JSON.stringify(notificationData),
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    })
-    .catch((error) => {
-      console.error("Error sending notification:", error);
-      throw error;
-    });
-}
-
-// Save notification token
-async function saveNotificationToken(token) {
-  const bearerAuth = await getBearerAuth();
-  return fetch(`${BASE_URL}/save-notification-token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: bearerAuth,
-    },
-    body: JSON.stringify({ token }),
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    })
-    .catch((error) => {
-      console.error("Error saving notification token:", error);
-      throw error;
-    });
-}
-
 // Search users
 async function searchUsers(query) {
   const bearerAuth = await getBearerAuth();
@@ -231,8 +185,6 @@ export {
   updateUserProfile,
   updateProfilePhoto,
   changePassword,
-  sendNotification,
-  saveNotificationToken,
   searchUsers,
   getUserReport,
   getAllUsers,
