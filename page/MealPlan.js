@@ -18,12 +18,18 @@ import { Calendar } from 'react-native-calendars';
 import {getAllMealPlan, deleteMealPlan} from '../controller/MealPlanController';
 import { getToken } from '../controller/AuthController';
 import { useNavigation } from '@react-navigation/native';
-
+import { getUserFromStorage } from '../controller/UserController';
 const MealPlannerScreen = () => {
   const navigation = useNavigation()
   const getBearerAuth = async () => {
     const token = await getToken(); // Lấy token từ AsyncStorage
     return `Bearer ${token}`; // Trả về chuỗi Bearer token
+  };
+
+  //const [groupId, setGroupId] = useState({});
+  const getUserGroupList = async () => {
+    const user = await getUserFromStorage(); // Lấy token từ AsyncStorage
+    return user.groupIds; // Trả về chuỗi Bearer token
   };
 
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -44,12 +50,13 @@ const MealPlannerScreen = () => {
   };
 
   const fetchMealPlan = async () => {
+   const userGroupIds = await getUserGroupList();
     try {
       setLoading(true);
       setError(null);
       // await fetchGroup();
       // const formattedDate = date.toISOString().split('T')[0];
-      const data = await getAllMealPlan(listGroup);
+      const data = await getAllMealPlan(userGroupIds);
       const sortedData = data.data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       // console.log('>>>>>>>>>sortedData',sortedData)
       setMealPlan(sortedData);
@@ -137,10 +144,10 @@ const MealPlannerScreen = () => {
   }, [])
 
   useEffect(() => {
-    if (alreadyFetchGroup) {
-      fetchMealPlan().then(data => {organizeMealPlans(data)});
-    }
-  }, [alreadyFetchGroup]);
+  
+      fetchMealPlan().then(data => {organizeMealPlans(data); console.log("dayadsdvdsfb fxg: "+data)});
+    
+  }, []);
 
   useEffect(() => {
     const map = listGroup.reduce((acc, group) => {

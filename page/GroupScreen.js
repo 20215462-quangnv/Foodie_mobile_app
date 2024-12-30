@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useEffect, useCallback, memo, useContext} from "react";
 import {
   View,
   FlatList,
@@ -22,7 +22,7 @@ import {
 import { getRecipeById } from "../controller/RecipeController";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
-
+import { FoodContext } from "../controller/FoodProviderContext";
 const brightColors = [
   "#4EA72E",
   "#FF6B6B",
@@ -112,6 +112,8 @@ const GroupScreen = ({ route }) => {
   const [updatedName, setUpdatedName] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const { listFood, loadingg } = useContext(FoodContext);
+
 
   useEffect(() => {
     const loadGroupData = async () => {
@@ -119,15 +121,15 @@ const GroupScreen = ({ route }) => {
       try {
         const response = await getGroupById(groupId);
         setGroup(response.data); // Set the group details
-        const groupRecipes = response.data.groupRecipes || [];
+        // const groupRecipes = response.data.groupRecipes || [];
 
-        const recipeDetailsPromises = groupRecipes.map(async (groupRecipe) => {
-          const recipeResponse = await getRecipeById(groupRecipe.recipeId);
-          return recipeResponse.data;
-        });
+        // const recipeDetailsPromises = groupRecipes.map(async (groupRecipe) => {
+        //   const recipeResponse = await getRecipeById(groupRecipe.recipeId);
+        //   return recipeResponse.data;
+        // });
 
-        const allRecipes = await Promise.all(recipeDetailsPromises);
-        setRecipes(allRecipes);
+        const allRecipes = await getRecipeById(groupId);;
+        setRecipes(allRecipes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -274,7 +276,7 @@ const GroupScreen = ({ route }) => {
 
           <TouchableOpacity
             style={styles.bubble}
-            onPress={() => navigation.navigate("Recipe", { recipeId: item.id })}
+            onPress={() => navigation.navigate("EditRecipe",  {editedItem : item, listFood: listFood})}
           >
             <Text style={styles.recipeTitle}>Recipe</Text>
             <Text style={styles.recipeName}>{item.name}</Text>
@@ -348,8 +350,7 @@ const GroupScreen = ({ route }) => {
           <TextInput
             style={styles.input}
             placeholder="Enter member's email"
-            value={newMemberEmail}
-            onChangeText={setNewMemberEmail}
+            onChangeText={(text) => setNewMemberEmail(text)}
             keyboardType="email-address"
             autoCapitalize="none"
           />
