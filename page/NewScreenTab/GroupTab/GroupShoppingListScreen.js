@@ -15,24 +15,20 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import {
-  getFoodsByGroupId,
-  deleteFood,
-  createFood,
-} from "../../../controller/FoodController";
+    getAllShoppingListByGroup
+} from "../../../controller/ShoppingController";
 import { getAllUnit } from "../../../controller/measureUnitController";
 import { Picker } from '@react-native-picker/picker';
 import { getAllCategory } from "../../../controller/FoodCategoryController";
 import { getUserProfile } from "../../../controller/UserController";
 
 
-const GroupFoodScreen = ({ route, navigation }) => {
+const GroupShoppingListScreen = ({ route, navigation }) => {
   const { groupId } = route.params;
-  const [foods, setFoods] = useState([]);
+  const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingItem, setAddingItem] = useState({});
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
-  const [unit, setUnit] = useState([]);
-  const [category, setCategory] = useState([]);
 
   const [user, setUser] = useState(null);
   useEffect(() => {
@@ -47,30 +43,6 @@ const GroupFoodScreen = ({ route, navigation }) => {
       fetchData();  
   }, []); 
 
-  useEffect(()=>{
-    async function fetchData() {
-      try {
-        const data = await getAllUnit();  
-        setUnit(data.data);
-      } catch (error) {
-        setError('Error fetching Unit');
-      }
-    } 
-    fetchData();  
-  },[])
-
-  useEffect(()=>{
-    async function fetchData() {
-      try {
-        const data = await getAllCategory();  
-        setCategory(data.data);
-      } catch (error) {
-        setError('Error fetching Unit');
-      }
-    } 
-    fetchData();  
-  },[])
-
 
 
   useEffect(() => {
@@ -80,9 +52,18 @@ const GroupFoodScreen = ({ route, navigation }) => {
   const loadFoods = async () => {
     try {
       setLoading(true);
-      const response = await getFoodsByGroupId(groupId);
-      console.log(response.data)
-      setFoods(response.data);
+      const response = await getAllShoppingListByGroup(groupId);
+    //   console.log(response.data)
+      setLists(response.data.map(item => ({
+        id: item.id,
+        name: item.name,
+        note: item.note,
+        date: new Date(item.date),
+        details: item.details,
+        owner_id: item.owner_id,
+        belong_to_group_id: item.belong_to_group_id,
+        assignToUserId: item.assign_to_user_id
+      }))); 
     } catch (error) {
       console.error("Error loading foods:", error);
       Alert.alert("Error", "Failed to load foods");
@@ -110,45 +91,41 @@ const GroupFoodScreen = ({ route, navigation }) => {
     ]);
   };
 
-  const [selectedUnit, setSelectedUnit] = useState(unit[0]?.id || null);
-  const [selectedCategory, setSelectedCategory] = useState(category[0]?.id || null);
 
   const openAddItemModal = () => {
     setAddItemModalVisible(true);
     setAddingItem({});
   };
-  const handleSaveAddedItem = () => {
-      const newItem = {
-        name: addingItem.name,
-        type: addingItem.type,
-        description: addingItem.description,
-        image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
-        groupId: groupId,
-        ownerId: user.id,
-        unitName: addingItem.unitName,
-        foodCategoryAlias: addingItem.foodCategoryAlias
-      }
-      createFood(newItem)
-      .then((createdFood) => {
-          setFoods((prevItems) => [...prevItems, createdFood]);
-          setAddItemModalVisible(false);
-          console.log('Food successfully added:', createdFood);
-      })
-      .catch((error) => {
-        console.error('Failed to create food:', error);
-      });
-  }
+//   const handleSaveAddedItem = () => {
+//       const newItem = {
+//         name: addingItem.name,
+//         type: addingItem.type,
+//         description: addingItem.description,
+//         image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+//         groupId: groupId,
+//         ownerId: user.id,
+//         unitName: addingItem.unitName,
+//         foodCategoryAlias: addingItem.foodCategoryAlias
+//       }
+//       createFood(newItem)
+//       .then((createdFood) => {
+//           setFoods((prevItems) => [...prevItems, createdFood]);
+//           setAddItemModalVisible(false);
+//           console.log('Food successfully added:', createdFood);
+//       })
+//       .catch((error) => {
+//         console.error('Failed to create food:', error);
+//       });
+//   }
 
   const renderFoodItem = ({ item }) => (
    
     <View style={styles.foodItem}>
-       <View style={styles.foodInfo}>
-        <Image  style={styles.imageWarning}  source={{ uri: item.imageUrl }}></Image>
-      </View>
       <View style={styles.foodInfo}>
         <Text style={styles.foodName}>{item.name}</Text>
-        <Text style={styles.foodDescription}>{item.type}</Text>
-        <Text style={styles.foodDescription}>{item.description}</Text>
+        <Text style={styles.foodDescription}>Số nhiệm vụ: {item.details.length}</Text>
+        <Text style={styles.foodDescription}>{item.note}</Text>
+        <Text style={styles.foodDescription}>{item.date.toISOString().split('T')[0]}</Text>
       </View>
       <View style={styles.foodActions}>
         <TouchableOpacity
@@ -176,7 +153,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={foods}
+        data={lists}
         renderItem={renderFoodItem}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
@@ -193,7 +170,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
       </TouchableOpacity>
 
 
-       <Modal
+       {/* <Modal
                 animationType="fade"
                 transparent={true}
                 visible={addItemModalVisible}
@@ -263,7 +240,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
                     </ScrollView>
                     
                     </View>
-                  </Modal>
+                  </Modal> */}
     </View>
   );
 };
@@ -459,4 +436,4 @@ imageWarning: {
 },
 });
 
-export default GroupFoodScreen;
+export default GroupShoppingListScreen;

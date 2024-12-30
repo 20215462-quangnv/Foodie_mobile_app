@@ -71,5 +71,33 @@ function updateTask(taskId, updatedTask) {
   });
 }
 
+function getAllShoppingListByGroup(groupId) {
+ 
+  return getBearerAuth().then(bearerAuth => {
+    console.log("bearerAuth: "+bearerAuth);
+        // console.log(userId);
+        const groupUrl = `${API_URL}/group/${groupId}`; 
+          return fetch(groupUrl, {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': bearerAuth,
+              },
+          })
+              .then(response => {
+                  if (response.ok) {
+                     console.log("reasscasdvasdf: "+response);
+                      return response.json();
+                  } else {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                  }
+              })
+              .catch(error => {
+                  console.error('Error fetching shopping list:', error);
+                  throw error;
+              });
+      });
+}
 
-export { getAllShoppingList, updateTask };
+
+export { getAllShoppingList, updateTask, getAllShoppingListByGroup };

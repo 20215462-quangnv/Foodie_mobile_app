@@ -24,6 +24,7 @@ import GroupScreen from "./page/GroupScreen";
 import GroupManagementScreen from "./page/NewScreenTab/GroupTab/GroupManagementScreen";
 import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
+import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -118,6 +119,21 @@ const RootNavigator = () => {
         options={{
           headerShown: true,
           title: "Group Foods",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+       <Stack.Screen
+        name="ShoppingList"
+        component={GroupShoppingListScreen}
+        options={{
+          headerShown: true,
+          title: "Shopping List",
           headerStyle: {
             backgroundColor: "#4EA72E",
           },

@@ -42,7 +42,7 @@ const GroupManagementScreen = ({ route, navigation }) => {
       title: "Shopping List",
       description: "Manage group shopping list",
       onPress: () => {
-        // Handle shopping list
+        navigation.navigate("ShoppingList", { groupId });
       },
     },
   ];
