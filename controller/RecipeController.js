@@ -1,7 +1,5 @@
-// Định nghĩa URL của API
-import Config from "react-native-config";
-import { DataTable } from "react-native-paper";
-const API_URL = "http://192.168.43.107:8080/api/recipe";
+import { getToken } from "../controller/AuthController";
+const API_URL = "http://10.0.2.2:8080/api/recipe";
 
 // Hàm để lấy Bearer token
 const getBearerAuth = async () => {
@@ -21,10 +19,8 @@ function getAllRecipes() {
       .then((response) => {
         if (response.ok) {
           //console.log(response.json());
-          return response.json(); // Nếu mã phản hồi là 200, chuyển đổi phản hồi thành JSON
           return response.json();
         } else {
-          throw new Error(`HTTP error! status: ${response.status}`); // Nếu mã phản hồi không phải 200, ném lỗi
           throw new Error(`HTTP error! status: ${response.status}`);
         }
       })

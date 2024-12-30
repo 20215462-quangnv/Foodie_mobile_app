@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import {getFoodByGroup} from '../../../controller/FoodController';
+import {getFoodsByGroupId} from '../../../controller/FoodController';
 import {createMealPlan} from '../../../controller/MealPlanController';
 
 const CreateMealPlan = ({ route, navigation }) => {
@@ -39,7 +39,7 @@ const CreateMealPlan = ({ route, navigation }) => {
 
   const fetchMeals = async (groupId) => {
     try {
-      const response = await getFoodByGroup(groupId);
+      const response = await getFoodsByGroupId(groupId);
       setMeals(response.data);
     } catch (error) {
       console.error('Error fetching meals:', error);

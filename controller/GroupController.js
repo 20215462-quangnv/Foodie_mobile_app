@@ -1,33 +1,48 @@
-// Định nghĩa URL cơ bản của API
-const API_URL = "http://192.168.43.107:8080/api/user/group";
-const bearerAuth = `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3MzUxMzg2NzIsImV4cCI6MTczNTIyNTA3Mn0.tMvFCShvU4NcOFcm65mazXoHMgUR6lYHumtJxaC3hRo`;
+import { getToken } from "./AuthController";
 
-// Hàm gọi API PUT để update nhóm
-function updateGroup(groupData) {
-  return fetch(`${API_URL}`, {
+// Base URL for the API
+const API_URL = "http://10.0.2.2:8080/api/user/group";
+
+const getBearerAuth = async () => {
+  const token = await getToken();
+  return `Bearer ${token}`;
+};
+
+// Update group
+async function updateGroup(groupData) {
+  const bearerAuth = await getBearerAuth();
+  return fetch(API_URL, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: bearerAuth,
     },
-    body: JSON.stringify(groupData),
+    body: JSON.stringify({
+      id: groupData.id,
+      name: groupData.name,
+      description: groupData.description,
+      enable: true,
+    }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const errorText = await response.text();
+      throw new Error(
+        `HTTP error! status: ${response.status}, body: ${errorText}`
+      );
     })
     .catch((error) => {
-      console.error("Error creating group:", error);
+      console.error("Error updating group:", error);
       throw error;
     });
 }
 
-// Hàm gọi API POST để thêm một thành viên vào nhóm
-function addMemberToGroup(groupId, userId) {
-  return fetch(`${API_URL}/${groupId}/members/${userId}`, {
+// Add member to group
+async function addMemberToGroup(groupId, email) {
+  const bearerAuth = await getBearerAuth();
+  return fetch(`${API_URL}/${groupId}/members?email=${email}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,10 +51,9 @@ function addMemberToGroup(groupId, userId) {
   })
     .then((response) => {
       if (response.ok) {
-        console.log(`User ${userId} added to group ${groupId} successfully.`);
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error("Error adding member to group:", error);
@@ -47,8 +61,9 @@ function addMemberToGroup(groupId, userId) {
     });
 }
 
-// Hàm gọi API DELETE để xóa một thành viên khỏi nhóm
-function removeMemberFromGroup(groupId, userId) {
+// Remove member from group
+async function removeMemberFromGroup(groupId, userId) {
+  const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}/${groupId}/members/${userId}`, {
     method: "DELETE",
     headers: {
@@ -58,12 +73,9 @@ function removeMemberFromGroup(groupId, userId) {
   })
     .then((response) => {
       if (response.ok) {
-        console.log(
-          `User ${userId} removed from group ${groupId} successfully.`
-        );
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        return response.json();
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error("Error removing member from group:", error);
@@ -71,8 +83,9 @@ function removeMemberFromGroup(groupId, userId) {
     });
 }
 
-// Hàm gọi API POST để tạo một nhóm cụ thể (ví dụ tạo nhóm nâng cao)
-function createGroup(groupData) {
+// Create group
+async function createGroup(groupData) {
+  const bearerAuth = await getBearerAuth();
   return fetch(
     `${API_URL}/create?name=${groupData.name}&description=${groupData.description}`,
     {
@@ -86,18 +99,18 @@ function createGroup(groupData) {
     .then((response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
-      console.error("Error creating specific group:", error);
+      console.error("Error creating group:", error);
       throw error;
     });
 }
 
-// Hàm gọi API GET để lấy thông tin một nhóm
-function getGroupById(groupId) {
+// Get group by ID
+async function getGroupById(groupId) {
+  const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}/${groupId}`, {
     method: "GET",
     headers: {
@@ -108,9 +121,8 @@ function getGroupById(groupId) {
     .then((response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error(`Error fetching group with ID ${groupId}:`, error);
@@ -118,8 +130,9 @@ function getGroupById(groupId) {
     });
 }
 
-// Hàm gọi API DELETE để xóa một nhóm
-function deleteGroup(groupId) {
+// Delete group
+async function deleteGroup(groupId) {
+  const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}/${groupId}`, {
     method: "DELETE",
     headers: {
@@ -127,12 +140,15 @@ function deleteGroup(groupId) {
       Authorization: bearerAuth,
     },
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
-        console.log(`Group ${groupId} deleted successfully.`);
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+          return await response.json();
+        } catch {
+          return true;
+        }
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error(`Error deleting group with ID ${groupId}:`, error);
@@ -140,8 +156,9 @@ function deleteGroup(groupId) {
     });
 }
 
-// Hàm gọi API GET để lấy danh sách tất cả thành viên trong nhóm
-function getGroupMembers(groupId) {
+// Get group members
+async function getGroupMembers(groupId) {
+  const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}/${groupId}/members`, {
     method: "GET",
     headers: {
@@ -152,9 +169,8 @@ function getGroupMembers(groupId) {
     .then((response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error(
@@ -165,8 +181,9 @@ function getGroupMembers(groupId) {
     });
 }
 
-// Hàm gọi API GET để lấy danh sách tất cả các nhóm
-function getAllGroups() {
+// Get all groups
+async function getAllGroups() {
+  const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}/all`, {
     method: "GET",
     headers: {
@@ -177,9 +194,8 @@ function getAllGroups() {
     .then((response) => {
       if (response.ok) {
         return response.json();
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      throw new Error(`HTTP error! status: ${response.status}`);
     })
     .catch((error) => {
       console.error("Error fetching all groups:", error);
@@ -187,7 +203,6 @@ function getAllGroups() {
     });
 }
 
-// Xuất các hàm để sử dụng ở nơi khác
 export {
   createGroup,
   addMemberToGroup,
