@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -8,29 +8,26 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { getAllGroups } from "../controller/GroupController";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
-const ChatScreen = () => {
+const ChatScreen = ({ navigation, route }) => {
   const [groups, setGroups] = useState([]);
-  const navigation = useNavigation();
 
-  useEffect(() => {
-    async function fetchGroups() {
-      try {
-        const response = await getAllGroups();
-        // Truy cập vào "data" trong response để lấy mảng các group
-        const fetchedGroups = response.data;
+  // Refresh groups when screen is focused or when returning from group deletion
+  useFocusEffect(
+    useCallback(() => {
+      const loadGroups = async () => {
+        try {
+          const response = await getAllGroups();
+          setGroups(response.data);
+        } catch (error) {
+          console.error("Error loading groups:", error);
+        }
+      };
 
-        // Kiểm tra và log dữ liệu nhóm
-        console.log("Fetched groups:", fetchedGroups);
-
-        setGroups(fetchedGroups);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      }
-    }
-    fetchGroups();
-  }, []);
+      loadGroups();
+    }, [route.params?.refresh]) // Will re-run when refresh param changes
+  );
 
   const filteredGroups = Array.isArray(groups)
     ? groups.filter((group) => group.enable === true)

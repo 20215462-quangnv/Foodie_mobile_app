@@ -23,36 +23,46 @@ import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
 import GroupScreen from "./page/GroupScreen";
 import GroupManagementScreen from "./page/NewScreenTab/GroupTab/GroupManagementScreen";
 import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
+import ProfileScreen from "./page/ProfileScreen";
+import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen";
+import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
 const Stack = createStackNavigator();
+
+// Create wrapped component outside of RootNavigator
+const WrappedHomeScreen = (props) => (
+  <FoodProvider>
+    <HomeScreen {...props} />
+  </FoodProvider>
+);
 
 const App = () => {
   const [showFooter, setShowFooter] = React.useState(false);
 
   return (
-    <FoodProvider> 
-    <NavigationContainer
-      onStateChange={(state) => {
-        if (state) {
-          const currentRoute = state.routes[state.index].name;
-          setShowFooter(currentRoute !== "Login"); // Chỉ ẩn Footer trên màn Login
-        }
-      }}
-    >
-      <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={
-            Platform.OS === "android" ? "transparent" : undefined
+    <FoodProvider>
+      <NavigationContainer
+        onStateChange={(state) => {
+          if (state) {
+            const currentRoute = state.routes[state.index].name;
+            setShowFooter(currentRoute !== "Login"); // Chỉ ẩn Footer trên màn Login
           }
-          translucent={Platform.OS === "android"}
-        />
-        <RootNavigator />
-        {showFooter && <Footer />}
-      </SafeAreaView>
+        }}
+      >
+        <SafeAreaView style={styles.container}>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={
+              Platform.OS === "android" ? "transparent" : undefined
+            }
+            translucent={Platform.OS === "android"}
+          />
+          <RootNavigator />
+          {showFooter && <Footer />}
+        </SafeAreaView>
       </NavigationContainer>
-      </FoodProvider> 
+    </FoodProvider>
   );
 };
 
@@ -70,12 +80,8 @@ const RootNavigator = () => {
       <Stack.Screen name="Store" component={StoreScreen} />
       <Stack.Screen
         name="Home"
+        component={WrappedHomeScreen}
         options={{ headerShown: false }}
-        component={(props) => (
-          <FoodProvider>
-            <HomeScreen {...props} />
-          </FoodProvider>
-        )}
       />
       <Stack.Screen name="Task" component={TaskScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />
@@ -128,12 +134,56 @@ const RootNavigator = () => {
           },
         }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="ShoppingList"
         component={GroupShoppingListScreen}
         options={{
           headerShown: true,
           title: "Shopping List",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: "Edit Profile",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: "Change Password",
+          headerShown: true,
           headerStyle: {
             backgroundColor: "#4EA72E",
           },

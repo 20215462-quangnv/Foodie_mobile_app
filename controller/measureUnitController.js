@@ -1,13 +1,12 @@
 import { getToken } from "./AuthController";
 import { getUserProfile } from "./UserController";
 
-const API_URL = "http://192.168.43.107:8080/api/admin/unit";
+const API_URL = "http://10.0.2.2:8080/api/admin/unit";
 
 const getBearerAuth = async () => {
   const token = await getToken();
   return `Bearer ${token}`;
 };
-
 
 async function getAllUnit() {
   const bearerAuth = await getBearerAuth();
@@ -30,6 +29,4 @@ async function getAllUnit() {
     });
 }
 
-
-export {getAllUnit};
-
+export { getAllUnit };
