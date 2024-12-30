@@ -7,11 +7,16 @@ import {
   Alert,
   Text,
 } from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
 import { createGroup } from "../../../controller/GroupController";
 
 const CreateGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState("");
   const [description, setDescription] = useState("");
+
+  const handleBack = () => {
+    navigation.goBack();
+  }
 
   const handleCreateGroup = async () => {
     if (!groupName.trim()) {
@@ -35,6 +40,9 @@ const CreateGroupScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Icon name="arrow-left" size={30} color="white" />
+        </TouchableOpacity>
         <Text style={styles.headerText}>Create New Group</Text>
       </View>
 
@@ -113,6 +121,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  backButton: {
+    position: 'absolute',
+    top: 75,
+    left: 10,
+    width: 50,
+    padding: 10,
+    // backgroundColor: '#fff',
+    borderRadius: 10,
+    zIndex: 1,
   },
 });
 
