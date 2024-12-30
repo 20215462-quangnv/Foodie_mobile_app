@@ -21,6 +21,9 @@ import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
 import GroupScreen from "./page/GroupScreen";
 import GroupManagementScreen from "./page/NewScreenTab/GroupTab/GroupManagementScreen";
 import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
+import ProfileScreen from "./page/ProfileScreen";
+import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen";
+import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 
 const Stack = createStackNavigator();
 
@@ -104,6 +107,50 @@ const RootNavigator = () => {
         options={{
           headerShown: true,
           title: "Group Foods",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: "Edit Profile",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: "Change Password",
+          headerShown: true,
           headerStyle: {
             backgroundColor: "#4EA72E",
           },

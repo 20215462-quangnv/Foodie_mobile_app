@@ -17,9 +17,13 @@ async function getUserProfile() {
       Authorization: bearerAuth,
     },
   })
-    .then((response) => {
+    .then(async (response) => {
+      const responseData = await response.json();
+      console.log("Response Status:", response.status);
+      console.log("Response Data:", JSON.stringify(responseData, null, 2));
+
       if (response.ok) {
-        return response.json();
+        return responseData;
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     })
@@ -80,24 +84,34 @@ async function updateProfilePhoto(photoData) {
 // Change password
 async function changePassword(passwordData) {
   const bearerAuth = await getBearerAuth();
-  return fetch(`${BASE_URL}/edit/change-password`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: bearerAuth,
-    },
-    body: JSON.stringify(passwordData),
-  })
-    .then((response) => {
+
+  try {
+    const userProfile = await getUserProfile();
+    const userId = userProfile.data.id;
+
+    const requestBody = {
+      userId: userId,
+      oldPassword: passwordData.oldPassword,
+      newPassword: passwordData.newPassword,
+    };
+
+    return fetch(`${BASE_URL}/edit/change-password`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
+      body: JSON.stringify(requestBody),
+    }).then(async (response) => {
+      const responseData = await response.json();
       if (response.ok) {
-        return response.json();
+        return responseData;
       }
       throw new Error(`HTTP error! status: ${response.status}`);
-    })
-    .catch((error) => {
-      console.error("Error changing password:", error);
-      throw error;
     });
+  } catch (error) {
+    throw error;
+  }
 }
 
 // Send notification
