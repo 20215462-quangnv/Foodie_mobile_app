@@ -29,6 +29,13 @@ import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordS
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 const Stack = createStackNavigator();
 
+// Create wrapped component outside of RootNavigator
+const WrappedHomeScreen = (props) => (
+  <FoodProvider>
+    <HomeScreen {...props} />
+  </FoodProvider>
+);
+
 const App = () => {
   const [showFooter, setShowFooter] = React.useState(false);
 
@@ -72,12 +79,8 @@ const RootNavigator = () => {
       <Stack.Screen name="Store" component={StoreScreen} />
       <Stack.Screen
         name="Home"
+        component={WrappedHomeScreen}
         options={{ headerShown: false }}
-        component={(props) => (
-          <FoodProvider>
-            <HomeScreen {...props} />
-          </FoodProvider>
-        )}
       />
       <Stack.Screen name="Task" component={TaskScreen} />
       <Stack.Screen name="Chat" component={ChatScreen} />

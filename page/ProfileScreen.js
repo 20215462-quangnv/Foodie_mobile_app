@@ -4,32 +4,67 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
-  Alert,
+  ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { getUserProfile } from "../controller/UserController";
+import { getAllRecipes } from "../controller/RecipeController";
+import { getAllGroups } from "../controller/GroupController";
 
 const ProfileScreen = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalRecipes: 0,
+    totalGroups: 0,
+  });
 
   useEffect(() => {
-    loadProfile();
+    loadDashboardData();
   }, []);
 
-  const loadProfile = async () => {
+  const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await getUserProfile();
-      setProfile(response.data);
+
+      // Load user profile
+      const profileResponse = await getUserProfile();
+      setProfile(profileResponse.data);
+      const userId = profileResponse.data.id;
+
+      // Load recipes created by user
+      const recipesResponse = await getAllRecipes();
+      const userRecipes = recipesResponse.data.filter(
+        (recipe) => recipe.author.id === userId
+      );
+
+      // Load groups where user is a member
+      const groupsResponse = await getAllGroups();
+      const userGroups = groupsResponse.data.filter((group) =>
+        group.members.some((member) => member.id === userId)
+      );
+
+      setStats({
+        totalRecipes: userRecipes.length,
+        totalGroups: userGroups.length,
+      });
     } catch (error) {
-      Alert.alert("Error", "Failed to load profile");
+      console.error("Error loading dashboard:", error);
+      Alert.alert("Error", "Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
   };
+
+  const StatCard = ({ icon, title, value, color }) => (
+    <View style={[styles.statCard, { borderLeftColor: color }]}>
+      <Icon name={icon} size={24} color={color} />
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statTitle}>{title}</Text>
+    </View>
+  );
 
   if (loading) {
     return (
@@ -38,31 +73,14 @@ const ProfileScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.photoContainer}>
-          {profile?.photoUrl ? (
-            <Image
-              source={{ uri: profile.photoUrl }}
-              style={styles.profilePhoto}
-            />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>
-                {profile?.fullName?.charAt(0) || "U"}
-              </Text>
-            </View>
-          )}
-          <TouchableOpacity
-            style={styles.editPhotoButton}
-            onPress={() => navigation.navigate("EditPhoto")}
-          >
-            <Icon name="camera" size={16} color="#fff" />
-          </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      {/* Profile Section */}
+      <View style={styles.profileSection}>
+        <View style={styles.avatarContainer}>
+          <Text style={styles.avatarText}>
+            {profile?.fullName?.charAt(0) || "U"}
+          </Text>
         </View>
-      </View>
-
-      <View style={styles.profileInfo}>
         <Text style={styles.name}>{profile?.fullName || "User"}</Text>
         <Text style={styles.email}>{profile?.email || ""}</Text>
         <Text style={styles.phoneNumber}>
@@ -70,6 +88,26 @@ const ProfileScreen = ({ navigation }) => {
         </Text>
       </View>
 
+      {/* Dashboard Stats */}
+      <View style={styles.statsContainer}>
+        <Text style={styles.sectionTitle}>Activity Dashboard</Text>
+        <View style={styles.statsGrid}>
+          <StatCard
+            icon="book"
+            title="Recipes"
+            value={stats.totalRecipes}
+            color="#4EA72E"
+          />
+          <StatCard
+            icon="users"
+            title="Groups"
+            value={stats.totalGroups}
+            color="#FF6B6B"
+          />
+        </View>
+      </View>
+
+      {/* Action Buttons */}
       <View style={styles.actions}>
         <TouchableOpacity
           style={styles.actionButton}
@@ -87,7 +125,7 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.actionText}>Change Password</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -96,74 +134,84 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  header: {
-    backgroundColor: "#4EA72E",
-    height: 200,
-    justifyContent: "center",
+  profileSection: {
     alignItems: "center",
+    padding: 20,
+    backgroundColor: "#4EA72E",
   },
-  photoContainer: {
-    position: "relative",
-    marginBottom: -50,
-  },
-  profilePhoto: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3,
-    borderColor: "#fff",
-  },
-  avatarPlaceholder: {
+  avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#fff",
+    marginBottom: 15,
   },
   avatarText: {
     fontSize: 40,
-    color: "#4EA72E",
     fontWeight: "bold",
-  },
-  editPhotoButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#4EA72E",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  profileInfo: {
-    alignItems: "center",
-    paddingTop: 60,
-    paddingHorizontal: 20,
+    color: "#4EA72E",
   },
   name: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#fff",
     marginBottom: 5,
   },
   email: {
     fontSize: 16,
-    color: "#666",
-    marginBottom: 20,
+    color: "#fff",
+    marginBottom: 5,
   },
   phoneNumber: {
     fontSize: 16,
+    color: "#fff",
+    marginBottom: 5,
+  },
+  statsContainer: {
+    padding: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+    color: "#333",
+  },
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  statCard: {
+    width: "100%",
+    padding: 15,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: "center",
+    borderLeftWidth: 4,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 5,
+    color: "#333",
+  },
+  statTitle: {
+    fontSize: 14,
     color: "#666",
-    marginBottom: 20,
   },
   actions: {
-    paddingHorizontal: 20,
+    padding: 20,
   },
   actionButton: {
     flexDirection: "row",

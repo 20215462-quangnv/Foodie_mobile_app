@@ -26,7 +26,7 @@ import {
   removeMemberFromGroup,
 } from "../controller/GroupController";
 import { getRecipeById } from "../controller/RecipeController";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FoodContext } from "../controller/FoodProviderContext";
 const brightColors = [
@@ -120,35 +120,34 @@ const GroupScreen = ({ route }) => {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const { listFood, loadingg } = useContext(FoodContext);
 
-  useEffect(() => {
-    const loadGroupData = async () => {
-      setLoading(true);
-      try {
-        const response = await getGroupById(groupId);
-        setGroup(response.data);
+  const loadGroupData = async () => {
+    setLoading(true);
+    try {
+      const response = await getGroupById(groupId);
+      setGroup(response.data);
 
-        const allRecipes = await getRecipeById(groupId);
-        // Sort recipes by date, newest first
-        const sortedRecipes = allRecipes.data.sort((a, b) => {
-          const dateA = new Date(a.createdAt);
-          const dateB = new Date(b.createdAt);
-          return dateB - dateA; // For descending order (newest first)
-        });
+      const allRecipes = await getRecipeById(groupId);
+      // Sort recipes by date, newest first
+      const sortedRecipes = allRecipes.data.sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB - dateA;
+      });
 
-        setRecipes(sortedRecipes);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setRecipes(sortedRecipes);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadGroupData();
-  }, [groupId]);
-
-  useEffect(() => {
-    loadMembers();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadGroupData();
+      loadMembers();
+    }, [groupId])
+  );
 
   const loadMembers = async () => {
     try {
@@ -237,12 +236,14 @@ const GroupScreen = ({ route }) => {
         style: "destructive",
         onPress: async () => {
           try {
-            const result = await deleteGroup(groupId);
-            console.log("Delete group result:", result); // Log the result
+            await deleteGroup(groupId);
             Alert.alert("Success", "Group deleted successfully", [
               {
                 text: "OK",
-                onPress: () => navigation.goBack(),
+                onPress: () => {
+                  // Pass back a result to indicate successful deletion
+                  navigation.navigate("Chat", { refresh: true });
+                },
               },
             ]);
           } catch (error) {

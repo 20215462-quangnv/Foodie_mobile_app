@@ -120,7 +120,7 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.title}>
-          <Text style={styles.titleText}>Foodies</Text>
+          <Text style={styles.titleText}>Foodie</Text>
         </View>
 
         <View style={styles.buttonGroup}>
@@ -129,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => navigation.navigate("ProfileScreen")}
           >
             <Text style={styles.circleButtonText}>
-              {userProfile?.fullName?.charAt(0) || "U"}
+              {userProfile?.fullName?.charAt(0) || "O"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.addButton}>

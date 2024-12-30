@@ -12,9 +12,7 @@ import { colors } from "./styles/RootStyle";
 import { Login } from "../controller/AuthController";
 import { getUserProfile } from "../controller/UserController";
 
-
-const LoginScreen = ({navigation}) => {
-
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
@@ -32,9 +30,7 @@ const LoginScreen = ({navigation}) => {
       } else {
         alert("Login failed! Please check your credentials.");
       }
-      
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Login error:", error);
       alert("An error occurred. Please try again.");
     }
@@ -50,7 +46,7 @@ const LoginScreen = ({navigation}) => {
       />
 
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Welcome to FOODIES</Text>
+        <Text style={styles.welcomeText}>Welcome to FOODIE</Text>
         <Text style={styles.subText}>Let's start listing your grocery</Text>
       </View>
 
@@ -62,7 +58,7 @@ const LoginScreen = ({navigation}) => {
         onChangeText={(text) => setEmail(text)}
       />
 
-       <TextInput
+      <TextInput
         style={styles.input}
         placeholder="Password"
         secureTextEntry={true}
@@ -70,11 +66,14 @@ const LoginScreen = ({navigation}) => {
         onChangeText={(text) => setPassword(text)}
       />
 
-      <TouchableOpacity style={[styles.button, styles.facebookButton]} onPress={handleLogin}>
+      <TouchableOpacity
+        style={[styles.button, styles.facebookButton]}
+        onPress={handleLogin}
+      >
         <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>
 
-       <Text style={styles.subText}>Đăng nhập bằng phương thức khác</Text>
+      <Text style={styles.subText}>Đăng nhập bằng phương thức khác</Text>
       <TouchableOpacity style={[styles.button, styles.facebookButton]}>
         <Icon name="facebook" size={24} color="white" />
         <Text style={styles.buttonText}>Sign in with Facebook</Text>
@@ -84,7 +83,6 @@ const LoginScreen = ({navigation}) => {
         <Icon name="envelope" size={24} color="white" />
         <Text style={styles.buttonText}>Sign in with Email</Text>
       </TouchableOpacity>
-
 
       <Text style={styles.subText}>Chưa có tài khoản?</Text>
       <TouchableOpacity style={[styles.button, styles.facebookButton]}>
