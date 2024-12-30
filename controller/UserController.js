@@ -32,6 +32,7 @@ async function getUserProfile() {
 
     if (response.ok) {
       const userData = await response.json();
+      console.log(userData);
       await AsyncStorage.setItem("userProfile", JSON.stringify(userData.data));
       return userData;
     } else {
