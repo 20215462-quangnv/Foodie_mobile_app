@@ -67,7 +67,7 @@ const MealPlannerScreen = () => {
     try {
     const bearerAuth = await getBearerAuth();
       setLoading(true);
-      const response = await fetch('http://192.168.100.183:8080/api/user/group/all', {
+      const response = await fetch('http://192.168.43.107:8080/api/user/group/all', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

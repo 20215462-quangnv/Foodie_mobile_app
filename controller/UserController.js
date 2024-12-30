@@ -1,6 +1,6 @@
 import { getToken } from "../controller/AuthController";
 
-const API_URL = "http://192.168.0.6:8080/api/user/profile";
+const API_URL = "http://192.168.43.107:8080/api/user/profile";
 
 const getBearerAuth = async () => {
   const token = await getToken(); // Lấy token từ AsyncStorage

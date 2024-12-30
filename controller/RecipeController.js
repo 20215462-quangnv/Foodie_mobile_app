@@ -1,7 +1,7 @@
 // Định nghĩa URL của API
 import Config from "react-native-config";
 import { DataTable } from "react-native-paper";
-const API_URL = "http://192.168.0.6:8080/api/recipe";
+const API_URL = "http://192.168.43.107:8080/api/recipe";
 
 // Hàm để lấy Bearer token
 const getBearerAuth = async () => {

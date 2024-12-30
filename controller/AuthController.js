@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.0.6:8080/api/user/auth/login';
+const API_URL = 'http://192.168.43.107:8080/api/user/auth/login';
 
 // Lưu token vào AsyncStorage
 const setToken = async (token) => {
