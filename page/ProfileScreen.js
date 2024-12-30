@@ -9,9 +9,13 @@ import {
   Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { getUserProfile } from "../controller/UserController";
+import {
+  getUserProfile,
+  updateProfilePhoto,
+} from "../controller/UserController";
 import { getAllRecipes } from "../controller/RecipeController";
 import { getAllGroups } from "../controller/GroupController";
+import * as ImagePicker from "expo-image-picker";
 
 const ProfileScreen = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
@@ -66,6 +70,48 @@ const ProfileScreen = ({ navigation }) => {
     </View>
   );
 
+  const handleChangePhoto = async () => {
+    try {
+      // Request permission
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission needed",
+          "Please grant permission to access your photos"
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const photoData = {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          name: "profile-photo.jpg",
+        };
+
+        try {
+          await updateProfilePhoto(photoData);
+          await loadDashboardData();
+          Alert.alert("Success", "Profile photo updated successfully");
+        } catch (error) {
+          Alert.alert("Error", "Failed to update profile photo");
+        }
+      }
+    } catch (error) {
+      console.error("Error updating photo:", error);
+      Alert.alert("Error", "Failed to access photo library");
+    }
+  };
+
   if (loading) {
     return (
       <ActivityIndicator style={styles.loader} size="large" color="#4EA72E" />
@@ -76,10 +122,18 @@ const ProfileScreen = ({ navigation }) => {
     <ScrollView style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>
-            {profile?.fullName?.charAt(0) || "U"}
-          </Text>
+        <View style={styles.avatarSection}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>
+              {profile?.fullName?.charAt(0) || "U"}
+            </Text>
+            <TouchableOpacity
+              style={styles.editPhotoButton}
+              onPress={handleChangePhoto}
+            >
+              <Icon name="camera" size={16} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
         <Text style={styles.name}>{profile?.fullName || "User"}</Text>
         <Text style={styles.email}>{profile?.email || ""}</Text>
@@ -238,6 +292,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  avatarSection: {
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  editPhotoButton: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#4EA72E",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
 });
 
