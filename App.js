@@ -28,6 +28,13 @@ import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen"
 import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
+import FooterAdmin from "./layout/FooterAdmin";
+import AdminHomeScreen from "./page/adminPage/AdminHome";
+import UnitScreen from "./page/adminPage/UnitScreen";
+import UnitControllerScreen from "./page/adminPage/UnitTab/UnitControllerScreen";
+import CategoryControllerScreen from "./page/adminPage/UnitTab/CategoryControllerScreen";
+import UserControllerScreen from "./page/adminPage/UserControllerScreen";
+import RegisterScreen from "./page/RegisterScreen";
 const Stack = createStackNavigator();
 
 // Create wrapped component outside of RootNavigator
@@ -39,35 +46,36 @@ const WrappedHomeScreen = (props) => (
 
 const App = () => {
   const [showFooter, setShowFooter] = React.useState(false);
-
+  const [showFooterAdmin, setShowFooterAdmin] = React.useState(false);
   return (
-    <FoodProvider>
-      <NavigationContainer
-        onStateChange={(state) => {
-          if (state) {
-            const currentRoute = state.routes[state.index].name;
-            setShowFooter(currentRoute !== "Login"); // Chỉ ẩn Footer trên màn Login
+    <NavigationContainer
+      onStateChange={(state) => {
+        if (state) {
+          const currentRoute = state.routes[state.index].name;
+          setShowFooter(currentRoute !== "Register" && currentRoute !== "Login" && currentRoute !== "AdminHome" && currentRoute !== "Unit" && currentRoute!=="UnitControllerScreen" && currentRoute!=="CategoryControllerScreen"&& currentRoute!=="UserControllerScreen"); // Chỉ ẩn Footer trên màn Login
+          setShowFooterAdmin(currentRoute !== "Register" && currentRoute !== "Login");
+          setShowFooterAdmin(currentRoute === "AdminHome" || currentRoute === "Unit" || currentRoute==="UnitControllerScreen" || currentRoute==="CategoryControllerScreen"|| currentRoute==="UserControllerScreen"); // Chỉ ẩn Footer trên màn Login
+        }
+      }}
+    >
+      <SafeAreaView style={styles.container}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={
+            Platform.OS === "android" ? "transparent" : undefined
           }
-        }}
-      >
-        <SafeAreaView style={styles.container}>
-          <StatusBar
-            barStyle="dark-content"
-            backgroundColor={
-              Platform.OS === "android" ? "transparent" : undefined
-            }
-            translucent={Platform.OS === "android"}
-          />
-          <RootNavigator />
+          translucent={Platform.OS === "android"}
+        />
+        <RootNavigator setShowFooter={setShowFooter} setShowFooterAdmin={setShowFooterAdmin} />
           {showFooter && <Footer />}
-        </SafeAreaView>
+          {showFooterAdmin && <FooterAdmin />}
+      </SafeAreaView>
       </NavigationContainer>
-    </FoodProvider>
   );
 };
 
 // Component điều hướng chính
-const RootNavigator = () => {
+const RootNavigator = ({ setShowFooter, setShowFooterAdmin }) => {
   return (
     <Stack.Navigator
       initialRouteName="Login"
@@ -75,22 +83,64 @@ const RootNavigator = () => {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Recipe" component={RecipeScreen} />
-      <Stack.Screen name="Store" component={StoreScreen} />
-      <Stack.Screen
-        name="Home"
-        component={WrappedHomeScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="Task" component={TaskScreen} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="Plan" component={MealPlannerScreen} />
-      <Stack.Screen name="EditRecipe" component={EditRecipeScreen} />
-      <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
+      <Stack.Screen name="Login" component={(props) => <LoginScreen {...props} setShowFooter={setShowFooter} setShowFooterAdmin={setShowFooterAdmin} />} />
+      <Stack.Screen name="Register"  component={(props) => <RegisterScreen {...props} setShowFooter={setShowFooter} setShowFooterAdmin={setShowFooterAdmin} />} />
+      <Stack.Screen name="AdminHome" component={AdminHomeScreen} />
+      <Stack.Screen name="Unit" component={UnitScreen} />
+      <Stack.Screen name="UnitControllerScreen" component={UnitControllerScreen} />
+       <Stack.Screen name="CategoryControllerScreen" component={CategoryControllerScreen} />
+         <Stack.Screen name="UserControllerScreen" component={UserControllerScreen} />
+
+
+      <Stack.Screen name="Recipe"   component = {(props) => (
+          <FoodProvider>  
+            <RecipeScreen {...props} />
+          </FoodProvider>
+        )}/>
+      <Stack.Screen name="Store"   component = {(props) => (
+          <FoodProvider>  
+            <StoreScreen {...props} />
+          </FoodProvider>
+        )} />
+      <Stack.Screen name="Home"
+        component = {(props) => (
+          <FoodProvider>  
+            <HomeScreen {...props} />
+          </FoodProvider>
+        )}
+        />
+      <Stack.Screen name="Task" component = {(props) => (
+          <FoodProvider>  
+            <TaskScreen {...props} />
+          </FoodProvider>
+        )} />
+      <Stack.Screen name="Chat"   component = {(props) => (
+          <FoodProvider> 
+            <ChatScreen {...props} />
+          </FoodProvider>
+        )} />
+      <Stack.Screen name="Plan"  component = {(props) => (
+          <FoodProvider> 
+            <MealPlannerScreen {...props} />
+          </FoodProvider>
+        )} />
+      <Stack.Screen name="EditRecipe" component = {(props) => (
+          <FoodProvider>  
+            <EditRecipeScreen {...props} />
+          </FoodProvider>
+        )} />
+      <Stack.Screen name="TaskDetails" component = {(props) => (
+          <FoodProvider>  
+            <TaskDetailsScreen {...props} />
+          </FoodProvider>
+        )} />
       <Stack.Screen
         name="CreateMealPlan"
-        component={CreateMealPlan}
+        component = {(props) => (
+          <FoodProvider>  
+            <CreateMealPlan {...props} />
+          </FoodProvider>
+        )}
         options={{
           title: "Create Meal Plan",
           animation: "slide_from_right",
@@ -98,16 +148,28 @@ const RootNavigator = () => {
       />
       <Stack.Screen
         name="CreateGroupScreen"
-        component={CreateGroupScreen}
+       component = {(props) => (
+          <FoodProvider>  
+            <CreateGroupScreen {...props} />
+          </FoodProvider>
+        )}
         options={{
           title: "Create Group",
           animation: "slide_from_bottom",
         }}
       />
-      <Stack.Screen name="GroupScreen" component={GroupScreen} />
+      <Stack.Screen name="GroupScreen" component = {(props) => (
+          <FoodProvider>  
+            <GroupScreen {...props} />
+          </FoodProvider>
+        )}/>
       <Stack.Screen
         name="GroupManagement"
-        component={GroupManagementScreen}
+        component = {(props) => (
+          <FoodProvider>  
+            <GroupManagementScreen {...props} />
+          </FoodProvider>
+        )}
         options={{
           title: "Group Management",
           headerStyle: {
@@ -121,7 +183,11 @@ const RootNavigator = () => {
       />
       <Stack.Screen
         name="GroupFoodScreen"
-        component={GroupFoodScreen}
+        component = {(props) => (
+          <FoodProvider>  
+            <GroupFoodScreen {...props} />
+          </FoodProvider>
+        )}
         options={{
           headerShown: true,
           title: "Group Foods",
@@ -136,10 +202,33 @@ const RootNavigator = () => {
       />
       <Stack.Screen
         name="ShoppingList"
-        component={GroupShoppingListScreen}
+        component = {(props) => (
+          <FoodProvider>  
+            <GroupShoppingListScreen {...props} />
+          </FoodProvider>
+        )}
         options={{
           headerShown: true,
           title: "Shopping List",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="TaskShoppingListScreen"
+        component = {(props) => (
+          <FoodProvider>  
+            <TaskShoppingListScreen {...props} />
+          </FoodProvider>
+        )}
+        options={{
+          headerShown: true,
+          title: "Task",
           headerStyle: {
             backgroundColor: "#4EA72E",
           },

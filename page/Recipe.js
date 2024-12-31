@@ -12,11 +12,9 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getAllRecipes, createRecipe, deleteRecipe } from '../controller/RecipeController';
-import { getUserProfile } from "../controller/UserController.js";
 import { colors } from "./styles/RootStyle.js";
-import { getAllFoodByGroup } from "../controller/FoodController.js";
 import { FoodContext } from "../controller/FoodProviderContext.js";
-
+import { getUserFromStorage } from "../controller/UserController.js";
 
 const RecipeScreen = ({ navigation }) => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -35,8 +33,8 @@ const RecipeScreen = ({ navigation }) => {
     useEffect(() => {
         async function fetchData() {
           try {
-            const data = await getUserProfile();  
-            setUser(data.data)
+            const data = await getUserFromStorage();  
+            setUser(data)
           } catch (error) {
             setError('Error fetching recipes');
           }

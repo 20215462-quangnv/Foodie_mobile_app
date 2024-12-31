@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://10.0.2.2:8080/api/user/auth/login";
+const API_URL = "http://192.168.0.6:8080/api/user/auth/login";
 import { useNavigation } from "@react-navigation/native";
 
 // Lưu token vào AsyncStorage
@@ -48,7 +48,7 @@ async function Login(email, password, navigation) {
       if (data?.token) {
         // Lưu token vào AsyncStorage sau khi đăng nhập thành công
         await setToken(data.token);
-        navigation.navigate("Home");
+        
         return data;
       } else {
         throw new Error("Token not found in response");
@@ -61,4 +61,31 @@ async function Login(email, password, navigation) {
   }
 }
 
-export { Login, setToken, getToken };
+async function Register(body, navigation) {
+  try {
+    const response = await fetch("http://192.168.0.6:8080/api/user/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.user) {
+        // Lưu token vào AsyncStorage sau khi đăng nhập thành công
+        console.log("Register success");
+        return data;
+      } else {
+        throw new Error("Token not found in response");
+      }
+    } else {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.log("Regíter failed due to error:", error.message);
+  }
+}
+
+export { Login, setToken, getToken, Register};

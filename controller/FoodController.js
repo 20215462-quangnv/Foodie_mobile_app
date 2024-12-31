@@ -1,7 +1,6 @@
 import { getToken } from "./AuthController";
-import { getUserProfile } from "./UserController";
-
-const API_URL = "http://10.0.2.2:8080/api/user/food";
+import { getUserFromStorage } from "./UserController";
+const API_URL = "http://192.168.0.6:8080/api/user/food";
 
 const getBearerAuth = async () => {
   const token = await getToken();
@@ -100,14 +99,22 @@ async function getFoodsByGroupId(groupId) {
 
 async function getAllFoodByGroup() {
   try {
-    const userProfile = await getUserProfile();
-    console.log(userProfile);
-    const groupIds = userProfile.data.groupIds; // Lấy danh sách groupIds từ user profile
-    console.log(groupIds);
-    const allGroups = await Promise.all(
-      groupIds.map((groupId) => getFoodsByGroupId(groupId))
-    );
-    return allGroups;
+      const userProfile = await getUserFromStorage();
+      console.log(userProfile);
+      const groupIds = userProfile.groupIds;  // Lấy danh sách groupIds từ user profile
+      console.log(groupIds); 
+      const allGroups = await Promise.all(
+          groupIds.map(groupId => getFoodsByGroupId(groupId))
+      );
+      return allGroups;
+    // const userProfile = await getUserProfile();
+    // console.log(userProfile);
+    // const groupIds = userProfile.data.groupIds; // Lấy danh sách groupIds từ user profile
+    // console.log(groupIds);
+    // const allGroups = await Promise.all(
+    //   groupIds.map((groupId) => getFoodsByGroupId(groupId))
+    // );
+    // return allGroups;
   } catch (error) {
     console.error("Error fetching all fridge groups:", error);
     throw error;

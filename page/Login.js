@@ -10,9 +10,10 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 import { colors } from "./styles/RootStyle";
 import { Login } from "../controller/AuthController";
-import { getUserProfile } from "../controller/UserController";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, setShowFooter, setShowFooterAdmin }) => {
+
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
@@ -26,7 +27,20 @@ const LoginScreen = ({ navigation }) => {
       const data = await Login(email, password, navigation);
       if (data?.token) {
         console.log("Login successful:", data);
-        const userProfile = await getUserProfile();
+        await AsyncStorage.setItem('userProfile',  JSON.stringify(data.user));
+        await AsyncStorage.setItem('userRole', JSON.stringify(data.role));
+        if (data.role === 'ADMIN') {
+          navigation.navigate("AdminHome");
+        }
+        else navigation.navigate("Home");
+        console.log("role    " +data.role);
+        if (data.role === "ADMIN") {
+          setShowFooter(false);  
+          setShowFooterAdmin(true);  
+      } else {
+        setShowFooter(true);  
+        setShowFooterAdmin(false);  
+      }
       } else {
         alert("Login failed! Please check your credentials.");
       }
@@ -74,7 +88,7 @@ const LoginScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <Text style={styles.subText}>Chưa có tài khoản?</Text>
-      <TouchableOpacity style={[styles.button, styles.facebookButton]}>
+      <TouchableOpacity style={[styles.button, styles.facebookButton]} onPress={() => {navigation.navigate("Register")}}>
         <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
     </View>

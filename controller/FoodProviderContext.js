@@ -15,6 +15,7 @@ export const FoodProvider = ({ children }) => {
                 setListFood(
                     data.filter(item => item.data && item.data.length > 0)
                         .map(item => {
+                            console.log("subitem: "+item.data.length+"   "+item.data[0].name)
                             return item.data.map(subItem => ({
                                 id: subItem.id,
                                 name: subItem.name,
@@ -22,7 +23,7 @@ export const FoodProvider = ({ children }) => {
                                 description: subItem.description,
                                 imageUrl: subItem.imageUrl,
                                 measureUnit: subItem.measureUnit,
-                                foodCategory: subItem.foodCategory.name,
+                                foodCategory: subItem.foodCategory,
                             }));
                         })
                         .flat()

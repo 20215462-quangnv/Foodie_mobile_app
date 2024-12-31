@@ -4,6 +4,7 @@ import moment from 'moment';
 
 const WeekCalendar = ({setDate}) => {
   const [weeks, setWeeks] = useState([]);
+  const [choosingDay, setChoosingDay] = useState();
   const flatListRef = useRef(null);
 
   // Hàm tạo dữ liệu cho lịch tuần
@@ -24,6 +25,7 @@ const WeekCalendar = ({setDate}) => {
   };
 
   useEffect(() => {
+    setChoosingDay(moment());
     generateWeeks();
   }, []);
 
@@ -37,6 +39,11 @@ const WeekCalendar = ({setDate}) => {
     }
   }, [weeks]);
 
+  const handlePress = (day) => {
+    setDate(day.toDate());
+    setChoosingDay(day);
+  }
+
   const renderItem = ({ item }) => (
     <View style={styles.weekContainer}>
       {item.map((day, index) => (
@@ -48,9 +55,9 @@ const WeekCalendar = ({setDate}) => {
           ]}
           >
             <Text style={[styles.dayText]}>{day.format('ddd')}</Text>
-          <TouchableOpacity style={[styles.dateContainer, moment().isSame(day, 'day') && styles.todayDay,]}
-          onPress ={() => setDate(day.toDate())}>
-                  <Text style={[styles.dayText, , moment().isSame(day, 'day') && styles.todayDayText]}>{day.format('D')}</Text>
+          <TouchableOpacity style={[styles.dateContainer, choosingDay.isSame(day, 'day') && styles.todayDay,]}
+          onPress ={() => handlePress(day)}>
+                  <Text style={[styles.dayText, , choosingDay.isSame(day, 'day') && styles.todayDayText]}>{day.format('D')}</Text>
             </TouchableOpacity>
           
         </View>
