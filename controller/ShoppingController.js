@@ -1,6 +1,6 @@
 import { getToken, setToken } from "../controller/AuthController";
 import { getUserFromStorage } from "./UserController";
-const API_URL = "http://192.168.43.107:8080/api/user/shopping";
+const API_URL = "http://192.168.0.6:8080/api/user/shopping";
 
 // Hàm để lấy Bearer token
 const getBearerAuth = async () => {

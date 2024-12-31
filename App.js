@@ -221,7 +221,11 @@ const RootNavigator = ({ setShowFooter, setShowFooterAdmin }) => {
       />
       <Stack.Screen
         name="TaskShoppingListScreen"
-        component={TaskShoppingListScreen}
+        component = {(props) => (
+          <FoodProvider>  
+            <TaskShoppingListScreen {...props} />
+          </FoodProvider>
+        )}
         options={{
           headerShown: true,
           title: "Task",

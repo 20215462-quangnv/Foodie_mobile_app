@@ -107,14 +107,14 @@ async function getAllFoodByGroup() {
           groupIds.map(groupId => getFoodsByGroupId(groupId))
       );
       return allGroups;
-    const userProfile = await getUserProfile();
-    console.log(userProfile);
-    const groupIds = userProfile.data.groupIds; // Lấy danh sách groupIds từ user profile
-    console.log(groupIds);
-    const allGroups = await Promise.all(
-      groupIds.map((groupId) => getFoodsByGroupId(groupId))
-    );
-    return allGroups;
+    // const userProfile = await getUserProfile();
+    // console.log(userProfile);
+    // const groupIds = userProfile.data.groupIds; // Lấy danh sách groupIds từ user profile
+    // console.log(groupIds);
+    // const allGroups = await Promise.all(
+    //   groupIds.map((groupId) => getFoodsByGroupId(groupId))
+    // );
+    // return allGroups;
   } catch (error) {
     console.error("Error fetching all fridge groups:", error);
     throw error;

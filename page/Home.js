@@ -138,10 +138,10 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
 
-        {/* Body */}
-        <View style={styles.body}>
-            <View style={styles.mainBody}>
-                {/* <View style={styles.listNote}>
+      {/* Body */}
+      <View style={styles.body}>
+        <View style={styles.mainBody}>
+          {/* <View style={styles.listNote}>
 
                     <View style={styles.hasList}>
                         <Text style={styles.headerText}>
@@ -157,95 +157,15 @@ const HomeScreen = ({ navigation }) => {
                         </ScrollView>
                     </View>
                 </View> */}
-                <View style={styles.suggestDish}>
-                  <Text style={styles.headerText}>Dựa theo tủ của bạn</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {recipeItems.map((item, i) => (
-                      <TouchableOpacity
-                        key={i}
-                        style={styles.itemSuggest}
-                        onPress={() => handleShowEditRecipe(item)}
-                      >
-                        <Text style={styles.titleSuggest}>{item.name}</Text>
-                        <Image
-                          source={{
-                            uri: item.food.imageUrl,
-                          }}
-                          style={styles.imageSuggest}
-                          onError={(e) =>
-                            console.log(
-                              "Error loading image: ",
-                              e.nativeEvent.error
-                            )
-                          }
-                        />
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                </View>
-                <View style={styles.warning}>
-                  <ScrollView style={styles.scrollViewWarning}>
-                    <View style={styles.itemHolder}>
-                      {fridgeItems.map((item, index) => {
-                        const daysLeft = checkExpired(item.expiredDate);
-
-                        if (daysLeft > 2) {
-                          return null;
-                        }
-
-                        return (
-                          <View key={index} style={styles.itemContainer}>
-                            <View style={styles.leftItem}>
-                              <Image
-                                source={{
-                                  uri: item.food.imageUrl,
-                                }}
-                                style={styles.imageWarning}
-                                onError={(e) =>
-                                  console.log(
-                                    "Error loading image: ",
-                                    e.nativeEvent.error
-                                  )
-                                }
-                              />
-                              <Text style={styles.itemText}>
-                                {item.foodName}
-                              </Text>
-                            </View>
-
-                            <View style={styles.rightItem}>
-                              {daysLeft < 0 && (
-                                <Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>
-                              )}
-                              {daysLeft >= 0 && daysLeft <= 2 && (
-                                <Text style={styles.textOrange}>
-                                  SẮP HẾT HẠN
-                                </Text>
-                              )}
-
-                              <Text style={styles.normalText}>
-                                Số lượng: {item.quantity}
-                              </Text>
-                              <Text style={styles.normalText}>
-                                Hết hạn: {item.expiredDate.getDate()}-
-                                {item.expiredDate.getMonth() + 1}-
-                                {item.expiredDate.getFullYear()}
-                              </Text>
-                            </View>
-                          </View>
-                        );
-                      })}
-                    </View>
-                  </ScrollView>
-                </View>
-              </ScrollView>
-            </View>
-          </View>
           <View style={styles.suggestDish}>
             <Text style={styles.headerText}>Dựa theo tủ của bạn</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {recipeItems.map((item, i) => (
-                <View key={i} style={styles.itemSuggest}>
+                <TouchableOpacity
+                  key={i}
+                  style={styles.itemSuggest}
+                  onPress={() => handleShowEditRecipe(item)}
+                >
                   <Text style={styles.titleSuggest}>{item.name}</Text>
                   <Image
                     source={{
@@ -253,10 +173,13 @@ const HomeScreen = ({ navigation }) => {
                     }}
                     style={styles.imageSuggest}
                     onError={(e) =>
-                      console.log("Error loading image: ", e.nativeEvent.error)
+                      console.log(
+                        "Error loading image: ",
+                        e.nativeEvent.error
+                      )
                     }
                   />
-                </View>
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -285,15 +208,19 @@ const HomeScreen = ({ navigation }) => {
                             )
                           }
                         />
-                        <Text style={styles.itemText}>{item.foodName}</Text>
+                        <Text style={styles.itemText}>
+                          {item.foodName}
+                        </Text>
                       </View>
 
                       <View style={styles.rightItem}>
                         {daysLeft < 0 && (
                           <Text style={styles.textRed}>ĐÃ HẾT HẠN</Text>
                         )}
-                        {daysLeft >= 0 && (
-                          <Text style={styles.textOrange}>SẮP HẾT HẠN</Text>
+                        {daysLeft >= 0 && daysLeft <= 2 && (
+                          <Text style={styles.textOrange}>
+                            SẮP HẾT HẠN
+                          </Text>
                         )}
 
                         <Text style={styles.normalText}>
@@ -313,8 +240,6 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
       </View>
-
-      {/* Footer */}
     </View>
   );
 };
