@@ -7,7 +7,6 @@ const getBearerAuth = async () => {
   return `Bearer ${token}`;
 };
 
-
 async function getAllUnit() {
   const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}`, {

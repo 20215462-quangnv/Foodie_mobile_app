@@ -49,80 +49,86 @@ async function getAllFridgeGroup() {
   }
 }
 function createFridgeItem(newItem) {
-  return getBearerAuth().then(bearerAuth => {
+  return getBearerAuth().then((bearerAuth) => {
     return fetch(API_URL, {
-      method: 'POST',  
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': bearerAuth,      
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
       },
-      body: JSON.stringify(newItem),  
+      body: JSON.stringify(newItem),
     })
-    .then(response => {
-      if (response.ok) {
-        return response.json();  
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    })
-    .then(data => {
-      console.log('Item created:', data);  
-      return data.data;
-    })
-    .catch(error => {
-      console.error('Error creating fridge item:', error);  
-    });
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      })
+      .then((data) => {
+        console.log("Item created:", data);
+        return data.data;
+      })
+      .catch((error) => {
+        console.error("Error creating fridge item:", error);
+      });
   });
 }
 function updateFridgeItem(fridgeItemId, updatedFridgeItem) {
-  console.log('Id   :', fridgeItemId); 
-  return getBearerAuth().then(bearerAuth => {
+  console.log("Id   :", fridgeItemId);
+  return getBearerAuth().then((bearerAuth) => {
     return fetch(`${API_URL}/${fridgeItemId}`, {
-      method: 'PUT',  
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': bearerAuth,      
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
       },
-      body: JSON.stringify(updatedFridgeItem),  
+      body: JSON.stringify(updatedFridgeItem),
     })
-    .then(response => {
-      if (response.ok) {
-        console.log(response);
-        return response.json();  
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    })
-    .then(data => {
-      console.log('Fridge Item updated:', data);  
-      return data.data;
-    })
-    .catch(error => {
-      console.error('Error updating Fridge Item:', error); 
-    });
+      .then((response) => {
+        if (response.ok) {
+          console.log(response);
+          return response.json();
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      })
+      .then((data) => {
+        console.log("Fridge Item updated:", data);
+        return data.data;
+      })
+      .catch((error) => {
+        console.error("Error updating Fridge Item:", error);
+      });
   });
 }
 function deleteFridgeItem(fridgeItemId) {
-  console.log("fridgeItemId "+ fridgeItemId);
-  return getBearerAuth().then(bearerAuth => {
+  console.log("fridgeItemId " + fridgeItemId);
+  return getBearerAuth().then((bearerAuth) => {
     return fetch(`${API_URL}/${fridgeItemId}`, {
-      method: 'DELETE',  
+      method: "DELETE",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': bearerAuth,      
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
       },
     })
-    .then(response => {
-      if (response.ok) {
-        console.log('Fridge Item deleted successfully'); 
-      } else {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-    })
-    .catch(error => {
-      console.error('Error deleting Fridge Item:', error);  
-    });
+      .then((response) => {
+        if (response.ok) {
+          console.log("Fridge Item deleted successfully");
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting Fridge Item:", error);
+      });
   });
 }
 
-export { getFridgeGroup, getAllFridgeGroup, createFridgeItem , updateFridgeItem, deleteFridgeItem};
+export {
+  getFridgeGroup,
+  getAllFridgeGroup,
+  createFridgeItem,
+  updateFridgeItem,
+  deleteFridgeItem,
+};

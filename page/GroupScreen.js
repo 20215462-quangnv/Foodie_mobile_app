@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, memo, useContext} from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  memo,
+  useContext,
+} from "react";
 import {
   View,
   FlatList,
@@ -20,7 +26,7 @@ import {
   removeMemberFromGroup,
 } from "../controller/GroupController";
 import { getRecipeById } from "../controller/RecipeController";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { FoodContext } from "../controller/FoodProviderContext";
 const brightColors = [
@@ -114,35 +120,34 @@ const GroupScreen = ({ route }) => {
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const { listFood, loadingg } = useContext(FoodContext);
 
+  const loadGroupData = async () => {
+    setLoading(true);
+    try {
+      const response = await getGroupById(groupId);
+      setGroup(response.data);
 
-  useEffect(() => {
-    const loadGroupData = async () => {
-      setLoading(true);
-      try {
-        const response = await getGroupById(groupId);
-        setGroup(response.data); // Set the group details
-        // const groupRecipes = response.data.groupRecipes || [];
+      const allRecipes = await getRecipeById(groupId);
+      // Sort recipes by date, newest first
+      const sortedRecipes = allRecipes.data.sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB - dateA;
+      });
 
-        // const recipeDetailsPromises = groupRecipes.map(async (groupRecipe) => {
-        //   const recipeResponse = await getRecipeById(groupRecipe.recipeId);
-        //   return recipeResponse.data;
-        // });
+      setRecipes(sortedRecipes);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const allRecipes = await getRecipeById(groupId);;
-        setRecipes(allRecipes.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadGroupData();
-  }, [groupId]);
-
-  useEffect(() => {
-    loadMembers();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadGroupData();
+      loadMembers();
+    }, [groupId])
+  );
 
   const loadMembers = async () => {
     try {
@@ -167,6 +172,10 @@ const GroupScreen = ({ route }) => {
       Alert.alert("Error", "Failed to add member");
     }
   };
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  }
 
   const handleUpdateSubmit = useCallback(
     async (name, description) => {
@@ -237,7 +246,10 @@ const GroupScreen = ({ route }) => {
             Alert.alert("Success", "Group deleted successfully", [
               {
                 text: "OK",
-                onPress: () => navigation.goBack(),
+                onPress: () => {
+                  // Pass back a result to indicate successful deletion
+                  navigation.navigate("Chat", { refresh: true });
+                },
               },
             ]);
           } catch (error) {
@@ -277,7 +289,12 @@ const GroupScreen = ({ route }) => {
 
           <TouchableOpacity
             style={styles.bubble}
-            onPress={() => navigation.navigate("EditRecipe",  {editedItem : item, listFood: listFood})}
+            onPress={() =>
+              navigation.navigate("EditRecipe", {
+                editedItem: item,
+                listFood: listFood,
+              })
+            }
           >
             <Text style={styles.recipeTitle}>Recipe</Text>
             <Text style={styles.recipeName}>{item.name}</Text>
@@ -336,43 +353,6 @@ const GroupScreen = ({ route }) => {
       />
     ),
     [showUpdateModal, group, handleUpdateSubmit]
-  );
-
-  const AddMemberModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={showAddMemberModal}
-      onRequestClose={() => setShowAddMemberModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Add New Member</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter member's email"
-            onChangeText={(text) => setNewMemberEmail(text)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TouchableOpacity
-            style={styles.updateButton}
-            onPress={() => {
-              handleAddMember();
-              setShowAddMemberModal(false);
-            }}
-          >
-            <Text style={styles.buttonText}>Add Member</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setShowAddMemberModal(false)}
-          >
-            <Text style={styles.closeButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
   );
 
   const GroupManagementModal = () => (
@@ -465,6 +445,9 @@ const GroupScreen = ({ route }) => {
         <View style={styles.groupHeader}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
+              <TouchableOpacity style={[styles.backButton, { zIndex: 1 }]} onPress={handleGoBack}>
+                <Icon name="arrow-left" size={30} color="white" />
+              </TouchableOpacity>
               <Text style={styles.groupName}>{group.name}</Text>
               <Text style={styles.groupDescription}>{group.description}</Text>
             </View>
@@ -497,7 +480,40 @@ const GroupScreen = ({ route }) => {
       <GroupManagementModal />
       <MembersModal />
       <UpdateGroupModal />
-      <AddMemberModal />
+      <Modal
+      animationType="slide"
+      // transparent={true}
+      visible={showAddMemberModal}
+      // onRequestClose={() => setShowAddMemberModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Add New Member</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter member's email"
+            onChangeText={(text) => {setNewMemberEmail(text)}}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={() => {
+              handleAddMember();
+              setShowAddMemberModal(false);
+            }}
+          >
+            <Text style={styles.buttonText}>Add Member</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowAddMemberModal(false)}
+          >
+            <Text style={styles.closeButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
     </View>
   );
 };
@@ -513,15 +529,30 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 40 : 60,
     marginBottom: 15,
   },
+  // groupName: {
+  //   color: "#fff",
+  //   fontSize: 28,
+  //   fontWeight: "bold",
+  // },
+  // groupDescription: {
+  //   color: "#fff",
+  //   fontSize: 20,
+  //   marginTop: 5,
+  //   opacity: 0.9,
+  // },
   groupName: {
-    color: "#fff",
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: "bold",
+    bottom: 25,
+    color: "#fff",
+    textAlign: "center", // Căn giữa văn bản
   },
   groupDescription: {
-    color: "#fff",
     fontSize: 20,
-    marginTop: 5,
+    color: "#fff",
+    textAlign: "center", // Căn giữa văn bản
+    marginTop: 4,
+    bottom: 25,
     opacity: 0.9,
   },
   bubbleContainer: {
@@ -601,6 +632,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 10,
   },
+
   headerButtons: {
     flexDirection: "row",
     alignItems: "center",
@@ -617,18 +649,19 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalView: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
     padding: 20,
-    shadowColor: "#000",
+  },
+
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 25,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: -4,
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -650,10 +683,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 25,
+    textAlign: 'center',
   },
+
   memberItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -671,40 +707,55 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   closeButton: {
-    backgroundColor: "#4EA72E",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
+
   closeButtonText: {
-    color: "#fff",
+    color: '#666',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: '600',
   },
   input: {
-    height: 40,
+    backgroundColor: '#f8f8f8',
+    padding: 15,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: '#e0e0e0',
+    fontSize: 16,
+    marginBottom: 20,
+    color: '#333',
   },
   textArea: {
     height: 100,
     textAlignVertical: "top",
   },
   updateButton: {
-    backgroundColor: "#4EA72E",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
+    backgroundColor: '#4EA72E',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#4EA72E',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 3,
   },
+
   buttonText: {
-    color: "#fff",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: '600',
+  },
+  backButton: {
+    top: 10
   },
 });
 

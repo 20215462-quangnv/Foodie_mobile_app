@@ -97,7 +97,6 @@ async function getFoodsByGroupId(groupId) {
     });
 }
 
-
 async function getAllFoodByGroup() {
   try {
       const userProfile = await getUserFromStorage();
@@ -108,9 +107,17 @@ async function getAllFoodByGroup() {
           groupIds.map(groupId => getFoodsByGroupId(groupId))
       );
       return allGroups;
+    const userProfile = await getUserProfile();
+    console.log(userProfile);
+    const groupIds = userProfile.data.groupIds; // Lấy danh sách groupIds từ user profile
+    console.log(groupIds);
+    const allGroups = await Promise.all(
+      groupIds.map((groupId) => getFoodsByGroupId(groupId))
+    );
+    return allGroups;
   } catch (error) {
-      console.error('Error fetching all fridge groups:', error);
-      throw error;
+    console.error("Error fetching all fridge groups:", error);
+    throw error;
   }
 }
 
@@ -136,4 +143,11 @@ async function deleteFood(foodId) {
     });
 }
 
-export { createFood, updateFood, getFoodById, getFoodsByGroupId, deleteFood, getAllFoodByGroup };
+export {
+  createFood,
+  updateFood,
+  getFoodById,
+  getFoodsByGroupId,
+  deleteFood,
+  getAllFoodByGroup,
+};

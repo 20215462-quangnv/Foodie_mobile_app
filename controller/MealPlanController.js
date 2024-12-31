@@ -1,5 +1,6 @@
 import { getToken } from "../controller/AuthController";
-const API_URL = 'http://192.168.0.6:8080/api/meal';
+import { getUserProfile } from "./UserController";
+const API_URL = "http://192.168.43.107:8080/api/meal";
 
 const getBearerAuth = async () => {
   const token = await getToken(); // Lấy token từ AsyncStorage
@@ -94,9 +95,7 @@ const updateMealPlan = async (planId) => {
 const getAllMealPlan = async (listGroup) => {
   try {
     const bearerAuth = await getBearerAuth();
-    const queryString = listGroup
-      .map((id) => `groupIds=${id}`)
-      .join("&");
+    const queryString = listGroup.map((id) => `groupIds=${id}`).join("&");
     const endpoint = `${API_URL}/groups?${queryString}`;
 
     // Fetch request

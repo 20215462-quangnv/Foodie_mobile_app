@@ -6,7 +6,6 @@ const getBearerAuth = async () => {
   return `Bearer ${token}`;
 };
 
-
 async function getAllCategory() {
   const bearerAuth = await getBearerAuth();
   return fetch(`${API_URL}`, {

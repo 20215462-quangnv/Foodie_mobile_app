@@ -18,6 +18,7 @@ import {
   getFoodsByGroupId,
   deleteFood,
   createFood,
+  updateFood,
 } from "../../../controller/FoodController";
 import { getAllUnit } from "../../../controller/measureUnitController";
 import { Picker } from '@react-native-picker/picker';
@@ -29,7 +30,10 @@ const GroupFoodScreen = ({ route, navigation }) => {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingItem, setAddingItem] = useState({});
+  const [editingItem, setEditingItem] = useState({});
+  const [selectedItem, setSelectedItem] = useState();
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
+  const [editItemModalVisible, setEditItemModalVisible] = useState(false);
   const [unit, setUnit] = useState([]);
   const [category, setCategory] = useState([]);
 
@@ -100,6 +104,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
           try {
             await deleteFood(foodId);
             loadFoods(); // Refresh the list
+
             Alert.alert("Success", "Food deleted successfully");
           } catch (error) {
             Alert.alert("Error", "Failed to delete food");
@@ -129,13 +134,59 @@ const GroupFoodScreen = ({ route, navigation }) => {
       }
       createFood(newItem)
       .then((createdFood) => {
-          setFoods((prevItems) => [...prevItems, createdFood]);
+          setFoods((prevItems) => [...prevItems, createdFood.data]);
+          Alert.alert("Success", "Food deleted successfully");
           setAddItemModalVisible(false);
-          console.log('Food successfully added:', createdFood);
+          console.log('Food successfully added:', createdFood.data);
       })
       .catch((error) => {
         console.error('Failed to create food:', error);
       });
+  }
+
+  const handleSaveEditedItem = (foodId, ownerId) => {
+    const newItem = {
+      name: editingItem.name,
+      type: editingItem.type,
+      description: editingItem.description,
+      image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+      groupId: groupId,
+      ownerId: ownerId,
+      unitName: editingItem.unitName,
+      foodCategoryAlias: editingItem.foodCategoryAlias
+    }
+    updateFood(foodId, newItem)
+    .then((updatedFood) => {
+        const newFoods = foods;
+        for (let i = 0; i < newFoods.length; i++) {
+          if (newFoods[i].id === updatedFood.data.id) {
+            newFoods[i] = updatedFood.data
+          }
+        }
+        setFoods(newFoods);
+        Alert.alert("Success", "Food deleted successfully");
+        setEditItemModalVisible(false);
+        console.log('Food successfully updated:', updatedFood.data);
+    })
+    .catch((error) => {
+      console.error('Failed to update food:', error);
+    });
+  }
+
+  const handleEditFood = (item) => {
+    setSelectedItem(item)
+    setEditingItem({
+      name: item.name,
+      type: item.type,
+      description: item.description,
+      image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+      groupId: item.groupId,
+      ownerId: item.owner.id,
+      unitName: item.unitName,
+      foodCategoryAlias: item.foodCategoryAlias
+    })
+    setEditItemModalVisible(true);
+    setEditingItem({});
   }
 
   const renderFoodItem = ({ item }) => (
@@ -152,7 +203,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
       <View style={styles.foodActions}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate("EditFood", { foodId: item.id })}
+          onPress={() => handleEditFood(item)}
         >
           <Icon name="edit" size={20} color="#4EA72E" />
         </TouchableOpacity>
@@ -177,7 +228,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
       <FlatList
         data={foods}
         renderItem={renderFoodItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No foods found in this group</Text>
@@ -193,76 +244,147 @@ const GroupFoodScreen = ({ route, navigation }) => {
 
 
        <Modal
-                animationType="fade"
-                transparent={true}
-                visible={addItemModalVisible}
-                onRequestClose={() => setAddItemModalVisible(false)}
-            >
-                    <View style={styles.modalBackground}>
-                        <ScrollView style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Add Item</Text>
-                            <TextInput
-                                style={styles.modalInput}
-                              
-                                onChangeText={(text) => setAddingItem({ ...addingItem, name: text })}
-                                placeholder="Food Name"
-                            />
-                            <TextInput
-                                style={styles.modalInput}
-                                
-                                onChangeText={(text) => setAddingItem({ ...addingItem, type: text })}
-                                placeholder="Food type"
-                                
-                            />
-                              <TextInput
-                                style={styles.modalInput}
-                                
-                                onChangeText={(text) => setAddingItem({ ...addingItem, description: text })}
-                                placeholder="Food des"
-                            />
-
-                          <Text style={styles.label}>Select a unit:</Text>
-                            <Picker
-                                selectedValue={selectedUnit}
-                                style={styles.picker}
-                                onValueChange={(itemValue) =>  setAddingItem({...addingItem, unitName: itemValue.toString()})}
-                            >
-                                {unit.map((item) => (
-                                    <Picker.Item label={item.unitName} value={item.id} key={item.id} />
-                                ))}
-                            </Picker>
-                            <Text style={styles.selected}>
-                                Selected Unit: {unit.find((u) => u.id === selectedUnit)?.unitName || 'None'}
-                            </Text>
-                              
-                            <Text style={styles.label}>Select a category:</Text>
-                            <Picker
-                                selectedValue={selectedUnit}
-                                style={styles.picker}
-                                onValueChange={(itemValue) => setAddingItem({...addingItem, foodCategoryAlias: itemValue.toString()})}
-                            >
-                                {category.map((item) => (
-                                    <Picker.Item label={item.name} value={item.id} key={item.id} />
-                                ))}
-                            </Picker>
-                            <Text style={styles.selected}>
-                                Selected Unit: {unit.find((u) => u.id === selectedUnit)?.name || 'None'}
-                            </Text>
-                       
-                            <View style={styles.buttonHolder}>
-                                <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
-                                    <Text style={styles.saveButtonText}>Save</Text>
-                                </TouchableOpacity>
-                            <TouchableOpacity style={styles.cancelButton} onPress={() => { setAddItemModalVisible(false) }}>
-                                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                                </TouchableOpacity>
-                            </View>
+          animationType="fade"
+          transparent={true}
+          visible={addItemModalVisible}
+          onRequestClose={() => setAddItemModalVisible(false)}
+        >
+              <View style={styles.modalBackground}>
+                <ScrollView style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Add Item</Text>
+                    <TextInput
+                        style={styles.modalInput}
+                      
+                        onChangeText={(text) => setAddingItem({ ...addingItem, name: text })}
+                        placeholder="Food Name"
+                    />
+                    <TextInput
+                        style={styles.modalInput}
                         
-                            
-                    </ScrollView>
-                    
+                        onChangeText={(text) => setAddingItem({ ...addingItem, type: text })}
+                        placeholder="Food type"
+                        
+                    />
+                      <TextInput
+                        style={styles.modalInput}
+                        
+                        onChangeText={(text) => setAddingItem({ ...addingItem, description: text })}
+                        placeholder="Food des"
+                    />
+
+                  <Text style={styles.label}>Select a unit:</Text>
+                    <Picker
+                        selectedValue={selectedUnit}
+                        style={styles.picker}
+                        onValueChange={(itemValue) =>  setAddingItem({...addingItem, unitName: itemValue })}
+                    >
+                        {unit.map((item) => (
+                            <Picker.Item label={item.unitName} value={item.id} key={item.id} />
+                        ))}
+                    </Picker>
+                    <Text style={styles.selected}>
+                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.unitName || 'None'}
+                    </Text>
+                      
+                    <Text style={styles.label}>Select a category:</Text>
+                    <Picker
+                        selectedValue={selectedUnit}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setAddingItem({...addingItem, foodCategoryAlias: itemValue})}
+                    >
+                        {category.map((item) => (
+                            <Picker.Item label={item.name} value={item.id} key={item.id} />
+                        ))}
+                    </Picker>
+                    <Text style={styles.selected}>
+                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.name || 'None'}
+                    </Text>
+                
+                    <View style={styles.buttonHolder}>
+                        <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.cancelButton} onPress={() => { setAddItemModalVisible(false) }}>
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                        </TouchableOpacity>
                     </View>
-                  </Modal>
+                
+                    
+                </ScrollView> 
+              </View>
+            </Modal>
+            
+
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={editItemModalVisible}
+              onRequestClose={() => setEditItemModalVisible(false)}
+            >
+              <View style={styles.modalBackground}>
+                <ScrollView style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>Edit Food</Text>
+                    <TextInput
+                        style={styles.modalInput}
+                        defaultValue={selectedItem?.name || ''}
+                        onChangeText={(text) => setEditingItem({ ...editingItem, name: text })}
+                        placeholder="Food Name"
+                    />
+                    <TextInput
+                        style={styles.modalInput}
+                        defaultValue={selectedItem?.type || ''}
+                        onChangeText={(text) => setEditingItem({ ...editingItem, type: text })}
+                        placeholder="Food type"
+                        
+                    />
+                      <TextInput
+                        style={styles.modalInput}
+                        defaultValue={selectedItem?.description || ''}
+                        onChangeText={(text) => setEditingItem({ ...editingItem, description: text })}
+                        placeholder="Food des"
+                    />
+
+                  <Text style={styles.label}>Select a unit:</Text>
+                    <Picker
+                        selectedValue={selectedUnit}
+                        style={styles.picker}
+                        onValueChange={(itemValue) =>  setEditingItem({...editingItem, unitName: itemValue })}
+                    >
+                        {unit.map((item) => (
+                            <Picker.Item label={item.unitName} value={item.id} key={item.id} />
+                        ))}
+                    </Picker>
+                    <Text style={styles.selected}>
+                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.unitName || 'None'}
+                    </Text>
+                      
+                    <Text style={styles.label}>Select a category:</Text>
+                    <Picker
+                        selectedValue={selectedUnit}
+                        style={styles.picker}
+                        onValueChange={(itemValue) => setEditingItem({...editingItem, foodCategoryAlias: itemValue})}
+                    >
+                        {category.map((item) => (
+                            <Picker.Item label={item.name} value={item.id} key={item.id} />
+                        ))}
+                    </Picker>
+                    <Text style={styles.selected}>
+                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.name || 'None'}
+                    </Text>
+                
+                    <View style={styles.buttonHolder}>
+                        <TouchableOpacity style={styles.saveButton} onPress={() => {handleSaveEditedItem(selectedItem.id, selectedItem.owner.id)}}>
+                            <Text style={styles.saveButtonText}>Save</Text>
+                        </TouchableOpacity>
+                    <TouchableOpacity style={styles.cancelButton} onPress={() => { setEditItemModalVisible(false) }}>
+                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                
+                    
+                </ScrollView> 
+              </View>
+            </Modal>
     </View>
   );
 };
@@ -375,40 +497,50 @@ modalBackground: {
   flex: 1,
   justifyContent: "center",
   alignItems: "center",
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  backgroundColor: "rgba(0, 0, 0, 0.6)",
 },
 modalContainer: {
-  flex: 1,
+  maxHeight: "80%",
+  width: "90%",
   backgroundColor: "#fff",
+  borderRadius: 15,
   padding: 20,
-  borderRadius: 10,
-  width: 360,
-  margin: 50,
+  margin: 20,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.84,
+  elevation: 5,
 },
 modalTitle: {
   fontSize: 18,
   fontWeight: 'bold',
   marginBottom: 10,
 },
+modalTitle: {
+  fontSize: 24,
+  fontWeight: "700",
+  color: "#333",
+  marginBottom: 20,
+  textAlign: "center"
+},
 modalInput: {
   borderWidth: 1,
-  borderColor: '#ccc',
-  padding: 10,
-  marginBottom: 10,
-  borderRadius: 5,
-},
-modalInputContent: {
-  borderWidth: 1,
-  borderColor: '#ccc',
-  padding: 10,
-  marginBottom: 10,
-  borderRadius: 5,
-  flex: 1,
+  borderColor: "#E0E0E0",
+  borderRadius: 8,
+  padding: 12,
+  marginBottom: 15,
+  fontSize: 16,
+  backgroundColor: "#F8F9FA"
 },
 buttonHolder: {
-  marginTop: 'auto',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginTop: 20,
+  paddingHorizontal: 10
 },
 addFoodButton: {
   marginTop: 48,
@@ -421,31 +553,46 @@ addFoodButton: {
 },
 saveButton: {
   backgroundColor: "#4EA72E",
-  padding: 10,
-  borderRadius: 5,
+  paddingVertical: 12,
+  paddingHorizontal: 30,
+  borderRadius: 8,
+  elevation: 2
 },
 saveButtonText: {
   color: "#fff",
+  fontSize: 16,
+  fontWeight: "600"
 },
 cancelButton: {
   backgroundColor: "#E23131",
-  padding: 10,
-  borderRadius: 5,
+  paddingVertical: 12,
+  paddingHorizontal: 30,
+  borderRadius: 8,
+  elevation: 2
 },
 cancelButtonText: {
   color: "#fff",
+  fontSize: 16,
+  fontWeight: "600"
 },
 label: {
-  fontSize: 18,
-  marginBottom: 10,
+  fontSize: 16,
+  fontWeight: "600",
+  color: "#333",
+  marginBottom: 8,
+  marginTop: 10
 },
 picker: {
   height: 50,
-  width: 200,
+  width: "100%",
+  backgroundColor: "#F8F9FA",
+  borderRadius: 8,
+  marginBottom: 10
 },
 selected: {
-  marginTop: 20,
-  fontSize: 16,
+  fontSize: 14,
+  color: "#666",
+  marginBottom: 15
 },
 imageWarning: {
   borderRadius: 10,

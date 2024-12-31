@@ -23,6 +23,9 @@ import CreateGroupScreen from "./page/NewScreenTab/GroupTab/CreateGroupScreen";
 import GroupScreen from "./page/GroupScreen";
 import GroupManagementScreen from "./page/NewScreenTab/GroupTab/GroupManagementScreen";
 import GroupFoodScreen from "./page/NewScreenTab/GroupTab/GroupFoodScreen";
+import ProfileScreen from "./page/ProfileScreen";
+import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen";
+import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
 import FooterAdmin from "./layout/FooterAdmin";
@@ -33,6 +36,13 @@ import CategoryControllerScreen from "./page/adminPage/UnitTab/CategoryControlle
 import UserControllerScreen from "./page/adminPage/UserControllerScreen";
 import RegisterScreen from "./page/RegisterScreen";
 const Stack = createStackNavigator();
+
+// Create wrapped component outside of RootNavigator
+const WrappedHomeScreen = (props) => (
+  <FoodProvider>
+    <HomeScreen {...props} />
+  </FoodProvider>
+);
 
 const App = () => {
   const [showFooter, setShowFooter] = React.useState(false);
@@ -190,7 +200,7 @@ const RootNavigator = ({ setShowFooter, setShowFooterAdmin }) => {
           },
         }}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="ShoppingList"
         component = {(props) => (
           <FoodProvider>  
@@ -200,6 +210,65 @@ const RootNavigator = ({ setShowFooter, setShowFooterAdmin }) => {
         options={{
           headerShown: true,
           title: "Shopping List",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="TaskShoppingListScreen"
+        component={TaskShoppingListScreen}
+        options={{
+          headerShown: true,
+          title: "Task",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{
+          title: "Profile",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          title: "Edit Profile",
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          title: "Change Password",
+          headerShown: true,
           headerStyle: {
             backgroundColor: "#4EA72E",
           },
