@@ -164,7 +164,7 @@ function updateList(listId, data) {
       })
       .then((data) => {
         console.log("List updated:", data);
-        return data.data;
+        return data;
       })
       .catch((error) => {
         console.error("Error updating list:", error);

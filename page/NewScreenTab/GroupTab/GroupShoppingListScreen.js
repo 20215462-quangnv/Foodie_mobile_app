@@ -41,7 +41,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
       async function fetchData() {
         try {
           const data = await getUserProfile();
-          console.log(members)
+          // console.log(members)
           setUser(data.data)
         } catch (error) {
           setError('Error fetching recipes');
@@ -105,6 +105,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
   }
 
   const handleSaveEditedItem = (itemId, itemOwner) => {
+    // console.log('hello')
     const newItem = {
       name: editingItem.name,
       note: editingItem.note,
@@ -122,8 +123,8 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
           }
         }
         setLists(newList);
-        setAddItemModalVisible(false);
-        console.log('list successfully added:', createdlist);
+        setEditItemModalVisible(false);
+        console.log('list successfully added:', editedlist);
     })
     .catch((error) => {
       console.error('Failed to create list:', error);
@@ -320,7 +321,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
         >
         <View style={styles.modalBackground}>
             <ScrollView style={styles.modalContainer}>
-                <Text style={styles.modalTitle}>Add List Task</Text>
+                <Text style={styles.modalTitle}>Edit List Task</Text>
                 <TextInput
                     style={styles.modalInput}
                   
@@ -340,7 +341,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
                 >
                   <Icon name="calendar" size={20} color="#4EA72E" />
                     <Text style={styles.datePickerButtonText}>
-                      {addingItem.date?.toLocaleDateString() || ""}
+                      {editingItem.date?.toLocaleDateString() || ""}
                     </Text>
                 </TouchableOpacity>
                 {showDatePicker && (
@@ -363,9 +364,9 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
                       key={member.id}
                       style={[
                         styles.memberItem,
-                        addingItem.assignToUserId === member.id && styles.memberItemSelected, // Đổi màu nếu được chọn
-                      ]}
-                      onPress={() => setAddingItem({ ...addingItem, assignToUserId: member.id })}
+                        editingItem.assignToUserId === member.id && styles.memberItemSelected, // Đổi màu nếu được chọn
+                      ]}editingItem
+                      onPress={() => setEditingItem({ ...editingItem, assignToUserId: member.id })}
                     >
                       <Image source={{ uri: member.photoUrl }} style={styles.photoUrl} />
                       <Text style={styles.memberName}>{member.fullName}</Text>
@@ -373,7 +374,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
                   ))}
                 </ScrollView>
                 <View style={styles.buttonHolder}>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveEditedItem(selectedItem?.id, selectedItem?.owner_id)}>
+                    <TouchableOpacity style={styles.saveButton} onPress={() => handleSaveEditedItem(selectedItem?.id, selectedItem?.owner_id)}>
                         <Text style={styles.saveButtonText}>Save</Text>
                     </TouchableOpacity>
                 <TouchableOpacity style={styles.cancelButton} onPress={() => { setEditItemModalVisible(false) }}>
