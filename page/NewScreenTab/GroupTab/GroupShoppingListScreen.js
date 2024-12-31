@@ -35,6 +35,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
   const [editItemModalVisible, setEditItemModalVisible] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [idToNameMap, setIdToNameMap] = useState({})
 
   const [user, setUser] = useState(null);
   useEffect(() => {
@@ -50,6 +51,13 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
       fetchData();  
   }, []); 
 
+  useEffect(() => {
+    const map = members.reduce((acc, member) => {
+      acc[member.id] = member.fullName;
+      return acc;
+    }, {});
+    setIdToNameMap(map);
+  }, [members]);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -184,7 +192,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
   const rederList = ({ item }) => (
    
     <Pressable
-      onLongPress={() => navigation.navigate("TaskShoppingListScreen", { listId: item.id })}
+      onLongPress={() => navigation.navigate("TaskShoppingListScreen", { listId: item.id, groupId: groupId })}
       delayLongPress={500} // 500ms delay để kích hoạt long press
     >
       <View style={styles.listItem}>
@@ -193,6 +201,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
           <Text style={styles.listDescription}>Số nhiệm vụ: {item.details.length}</Text>
           <Text style={styles.listDescription}>{item.note}</Text>
           <Text style={styles.listDescription}>{item.date.split('T')[0]}</Text>
+          <Text style={styles.listDescription}>Phân công: {idToNameMap[item?.assignToUserId]}</Text>
         </View>
         <View style={styles.listActions}>
           <TouchableOpacity

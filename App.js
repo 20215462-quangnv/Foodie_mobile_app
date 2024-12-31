@@ -28,7 +28,7 @@ import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen"
 import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
-import TaskShoppingListScreen from "./page/NewScreenTab/GroupTab/TaskScreen";
+import TaskShoppingListScreen from "./page/NewScreenTab/GroupTab/TaskShoppingListScreen";
 const Stack = createStackNavigator();
 
 // Create wrapped component outside of RootNavigator

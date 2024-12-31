@@ -15,52 +15,34 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import {
-    getAllShoppingListByGroup, createShoppingList, createTask, updateList, deleteShoppingList, deleteTask
+    createTask, deleteTask, getAllTaskByList
 } from "../../../controller/ShoppingController";
+import { getFoodsByGroupId }from "../../../controller/FoodController"
 import { Picker } from '@react-native-picker/picker';
 import { getUserProfile } from "../../../controller/UserController";
 
 
 const TaskShoppingListScreen = ({ route, navigation }) => {
-  const { groupId } = route.params;
+  const { listId, groupId } = route.params;
   const [tasks, settasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingItem, setAddingItem] = useState({});
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
-
+  const [idToMapUrl, setIdToMapUrl] = useState({});
+  const [foods, setFoods] = useState([]);
   const [user, setUser] = useState(null);
-  useEffect(() => {
-      async function fetchData() {
-        try {
-          const data = await getUserProfile();  
-          setUser(data.data)
-        } catch (error) {
-          setError('Error fetching recipes');
-        }
-      } 
-      fetchData();  
-  }, []); 
-
-
-
-  useEffect(() => {
-    loadtasks();
-  }, []);
 
   const loadTasks = async () => {
     try {
       setLoading(true);
-      const response = await getAllShoppingListByGroup(groupId);
+      const response = await getAllTaskByList(listId);
     //   console.log(response.data)
       setLists(response.data.map(item => ({
         id: item.id,
-        name: item.name,
-        note: item.note,
-        date: new Date(item.date),
-        details: item.details,
-        owner_id: item.owner_id,
-        belong_to_group_id: item.belong_to_group_id,
-        assignToUserId: item.assign_to_user_id
+        quantity: item.quantity,
+        done: item.done,
+        foodName: item.foodName,
+        foodImage: item.foodImage
       }))); 
     } catch (error) {
       console.error("Error loading Lists:", error);
@@ -70,8 +52,32 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
     }
   };
 
+  const loadFoods = async () => {
+    try {
+      const response = await getFoodsByGroupId(groupId);
+      setFoods(response.data.map(item => ({
+        id: item.id,
+        name: item.name,
+        type: item.type,
+        description: item.description,
+        imageUrl: item.imageUrl
+      })))
+    }
+    catch(err) {
+      console.error("Error loading food", err)
+    }
+  }
+
+  useEffect(() => {
+    loadFoods();
+  }, []);
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
   const handleDeleteList = async (listId) => {
-    Alert.alert("Delete List", "Are you sure you want to delete this List?", [
+    Alert.alert("Delete Task", "Are you sure you want to delete this Task?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
@@ -80,9 +86,9 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
           try {
             await deleteShoppingList(ListId);
             loadLists(); // Refresh the list
-            Alert.alert("Success", "List deleted successfully");
+            Alert.alert("Success", "Task deleted successfully");
           } catch (error) {
-            Alert.alert("Error", "Failed to delete List");
+            Alert.alert("Error", "Failed to delete Task");
           }
         },
       },
@@ -116,22 +122,16 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
 //       });
 //   }
 
-  const rederList = ({ item }) => (
+  const rederTask = ({ item }) => (
    
-    <View style={styles.listItem}>
-      <View style={styles.listInfo}>
-        <Text style={styles.listName}>{item.name}</Text>
-        <Text style={styles.listDescription}>Số nhiệm vụ: {item.details.length}</Text>
-        <Text style={styles.listDescription}>{item.note}</Text>
-        <Text style={styles.listDescription}>{item.date.toISOString().split('T')[0]}</Text>
+    <View style={styles.foodItem}>
+       <View style={styles.foodInfo}>
+        <Image  style={styles.imageWarning}  source={{ uri: item.imageUrl }}></Image>
       </View>
-      <View style={styles.listActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleDeleteList(item.id)}
-        >
-          <Icon name="trash" size={20} color="#FF6B6B" />
-        </TouchableOpacity>
+      <View style={styles.foodInfo}>
+        <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.foodDescription}>{item.quantity}</Text>
+        <Text style={styles.foodDescription}>{item.done}</Text>
       </View>
     </View>
   );
@@ -145,12 +145,12 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={lists}
-        renderItem={rederList}
-        keyExtractor={(item) => item.id.toString()}
+        data={tasks}
+        renderItem={rederTask}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No tasks found in this group</Text>
+          <Text style={styles.emptyText}>No task found in this list</Text>
         }
       />
 
@@ -161,78 +161,79 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
         <Icon name="plus" size={20} color="#fff" />
       </TouchableOpacity>
 
-
-       {/* <Modal
-                animationType="fade"
-                transparent={true}
-                visible={addItemModalVisible}
-                onRequestClose={() => setAddItemModalVisible(false)}
-            >
-                    <View style={styles.modalBackground}>
-                        <ScrollView style={styles.modalContainer}>
-                            <Text style={styles.modalTitle}>Add Item</Text>
-                            <TextInput
-                                style={styles.modalInput}
-                              
-                                onChangeText={(text) => setAddingItem({ ...addingItem, name: text })}
-                                placeholder="list Name"
-                            />
-                            <TextInput
-                                style={styles.modalInput}
-                                
-                                onChangeText={(text) => setAddingItem({ ...addingItem, type: text })}
-                                placeholder="list type"
-                                
-                            />
-                              <TextInput
-                                style={styles.modalInput}
-                                
-                                onChangeText={(text) => setAddingItem({ ...addingItem, description: text })}
-                                placeholder="list des"
-                            />
-
-                          <Text style={styles.label}>Select a unit:</Text>
-                            <Picker
-                                selectedValue={selectedUnit}
-                                style={styles.picker}
-                                onValueChange={(itemValue) =>  setAddingItem({...addingItem, unitName: itemValue.toString()})}
-                            >
-                                {unit.map((item) => (
-                                    <Picker.Item label={item.unitName} value={item.id} key={item.id} />
-                                ))}
-                            </Picker>
-                            <Text style={styles.selected}>
-                                Selected Unit: {unit.find((u) => u.id === selectedUnit)?.unitName || 'None'}
-                            </Text>
-                              
-                            <Text style={styles.label}>Select a category:</Text>
-                            <Picker
-                                selectedValue={selectedUnit}
-                                style={styles.picker}
-                                onValueChange={(itemValue) => setAddingItem({...addingItem, listCategoryAlias: itemValue.toString()})}
-                            >
-                                {category.map((item) => (
-                                    <Picker.Item label={item.name} value={item.id} key={item.id} />
-                                ))}
-                            </Picker>
-                            <Text style={styles.selected}>
-                                Selected Unit: {unit.find((u) => u.id === selectedUnit)?.name || 'None'}
-                            </Text>
-                       
-                            <View style={styles.buttonHolder}>
-                                <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
-                                    <Text style={styles.saveButtonText}>Save</Text>
-                                </TouchableOpacity>
-                            <TouchableOpacity style={styles.cancelButton} onPress={() => { setAddItemModalVisible(false) }}>
-                                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                                </TouchableOpacity>
+        <Modal
+            animationType="fade"
+            transparent={true}
+            visible={addItemModalVisible}
+            onRequestClose={() => setAddItemModalVisible(false)}
+        >
+                <View style={styles.modalBackground}>
+                    <ScrollView style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Add Task</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                          
+                            onChangeText={(text) => setAddingItem({ ...addingItem, quantity: text })}
+                            placeholder="quantity"
+                        />
+                        <TextInput
+                            style={styles.modalInput}
+                          
+                            onChangeText={(text) => setAddingItem({ ...addingItem, done: text })}
+                            placeholder="status"
+                          
+                        />
+                    {addingItem.food &&
+                        <View style={styles.foodSelectItem}>
+                            <Image source={{ uri: addingItem.food.imageUrl }} style={styles.foodImage} />
+                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                <Text>{addingItem.food.name}</Text>
+                                <Text >({addingItem.food.type})</Text>
                             </View>
-                        
-                            
-                    </ScrollView>
+                        </View>
+                    }
+                      
+                        <TouchableOpacity
+                            style={styles.addFoodButton}
+                            onPress={handleShowChooseFood}
+                        >
+                            <Text>Choose Food</Text>
+                        </TouchableOpacity>
+                      {showFoodSelectModal && (
+                        <View style={styles.foodSelectModal}>
+                            <Text style={styles.foodSelectTitle}>Select a Food</Text>
+                            {listFood.map((food) => (
+                            <TouchableOpacity
+                                key={food.id}
+                                style={styles.foodSelectItem}
+                                onPress={() => {
+                                handleChooseFood(food);
+                                setShowFoodSelectModal(false); // Đóng modal khi chọn món ăn
+                                }}
+                            >
+                                <Image source={{ uri: food.imageUrl }} style={styles.foodImage} />
+                                <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Text>{food.name}</Text>
+                                    <Text >({food.type})</Text>
+                                </View>
+                            </TouchableOpacity>
+                            ))}
+                        </View>
+                        )}
+                        <View style={styles.buttonHolder}>
+                            <TouchableOpacity style={styles.saveButton} onPress={handleSaveAddedItem}>
+                                <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+                        <TouchableOpacity style={styles.cancelButton} onPress={() => { setAddItemModalVisible(false); setShowFoodSelectModal(false) }}>
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
                     
-                    </View>
-                  </Modal> */}
+                        
+                </ScrollView>
+                
+                </View>
+        </Modal>
     </View>
   );
 };
@@ -425,6 +426,18 @@ imageWarning: {
   marginRight: 20
   // borderWidth: 1,
   // borderColor: "#000", 
+},
+foodSelectItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 12,
+},
+foodImage: {
+  width: 75,
+  height: 75,
+  borderRadius: 8,
+  marginRight: 10,
+  resizeMode: 'cover',
 },
 });
 

@@ -201,6 +201,32 @@ function getAllShoppingListByGroup(groupId) {
   });
 }
 
+function getAllTaskByList(listId) {
+  return getBearerAuth().then((bearerAuth) => {
+    console.log("bearerAuth: " + bearerAuth);
+    // console.log(userId);
+    const groupUrl = `${API_URL}/${listId}`;
+    return fetch(groupUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching tasks:", error);
+        throw error;
+      });
+  });
+}
+
 function deleteTask(taskId) {
   return getBearerAuth().then((bearerAuth) => {
     return fetch(`${API_URL}/task/${taskId}`, {
@@ -245,4 +271,4 @@ function deleteShoppingList(listId) {
   });
 }
 
-export { getAllShoppingList, updateTask, getAllShoppingListByGroup, createShoppingList, createTask, updateList, deleteShoppingList, deleteTask };
+export { getAllTaskByList, getAllShoppingList, updateTask, getAllShoppingListByGroup, createShoppingList, createTask, updateList, deleteShoppingList, deleteTask };
