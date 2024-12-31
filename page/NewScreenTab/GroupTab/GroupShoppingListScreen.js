@@ -192,7 +192,7 @@ const GroupShoppingListScreen = ({ route, navigation }) => {
   const rederList = ({ item }) => (
    
     <Pressable
-      onLongPress={() => navigation.navigate("TaskShoppingListScreen", { listId: item.id, groupId: groupId })}
+      onLongPress={() => navigation.navigate("TaskShoppingListScreen", {tasks:item.details, listId: item.id, groupId: groupId })}
       delayLongPress={500} // 500ms delay để kích hoạt long press
     >
       <View style={styles.listItem}>

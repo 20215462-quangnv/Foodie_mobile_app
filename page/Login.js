@@ -87,17 +87,6 @@ const LoginScreen = ({ navigation, setShowFooter, setShowFooterAdmin }) => {
         <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>
 
-      <Text style={styles.subText}>Đăng nhập bằng phương thức khác</Text>
-      <TouchableOpacity style={[styles.button, styles.facebookButton]}>
-        <Icon name="facebook" size={24} color="white" />
-        <Text style={styles.buttonText}>Sign in with Facebook</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.button, styles.emailButton]}>
-        <Icon name="envelope" size={24} color="white" />
-        <Text style={styles.buttonText}>Sign in with Email</Text>
-      </TouchableOpacity>
-
       <Text style={styles.subText}>Chưa có tài khoản?</Text>
       <TouchableOpacity style={[styles.button, styles.facebookButton]} onPress={() => {navigation.navigate("Register")}}>
         <Text style={styles.buttonText}>Đăng ký</Text>

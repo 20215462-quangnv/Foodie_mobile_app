@@ -1,6 +1,6 @@
 import { getToken, setToken } from "../controller/AuthController";
 import { getUserFromStorage } from "./UserController";
-const API_URL = "http://192.168.0.6:8080/api/user/shopping";
+const API_URL = "http://13.229.127.51:8080/api/user/shopping";
 
 // Hàm để lấy Bearer token
 const getBearerAuth = async () => {
@@ -51,18 +51,18 @@ function createTask(data) {
   return getBearerAuth().then((bearerAuth) => {
     console.log("bearerAuth: " + bearerAuth);
     // console.log(userId);
-    const groupUrl = `${API_URL}/task`;
+    const groupUrl = `${API_URL}/task?listId=${data.listId}`;
     return fetch(groupUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: bearerAuth,
-        body: JSON.stringify({
-          foodId: data.foodId,
-          quantity: data.quantity,
-          done: data.done,
-        })
       },
+      body: JSON.stringify({
+        foodId: data.foodId,
+        quantity: data.quantity,
+        done: data.done,
+      })
     })
       .then((response) => {
         if (response.ok) {

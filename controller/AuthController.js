@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://192.168.0.6:8080/api/user/auth/login";
+const API_URL = "http://13.229.127.51:8080/api/user/auth/login";
 import { useNavigation } from "@react-navigation/native";
 
 // Lưu token vào AsyncStorage
@@ -63,7 +63,7 @@ async function Login(email, password, navigation) {
 
 async function Register(body, navigation) {
   try {
-    const response = await fetch("http://192.168.0.6:8080/api/user/auth/register", {
+    const response = await fetch("http://13.229.127.51:8080/api/user/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -73,7 +73,7 @@ async function Register(body, navigation) {
 
     if (response.ok) {
       const data = await response.json();
-      if (data?.user) {
+      if (data?.token) {
         // Lưu token vào AsyncStorage sau khi đăng nhập thành công
         console.log("Register success");
         return data;
@@ -84,7 +84,7 @@ async function Register(body, navigation) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
   } catch (error) {
-    console.log("Regíter failed due to error:", error.message);
+    console.log("Register failed due to error:", error.message);
   }
 }
 

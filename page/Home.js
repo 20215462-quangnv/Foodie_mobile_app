@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   /* suggest */
   suggestDish: {
     padding: 10,
-    flex: 2,
+    flex: 1.3,
     backgroundColor: "#4EA72E",
     marginLeft: 10,
     marginBottom: 10,
@@ -371,8 +371,11 @@ const styles = StyleSheet.create({
     margin: 5,
     borderRadius: 5,
     overflow: "hidden",
+    justifyContent: 'center',
   },
-  titleSuggest: {},
+  titleSuggest: {
+    color: 'black',
+  },
   imageSuggest: {
     flex: 1,
   },

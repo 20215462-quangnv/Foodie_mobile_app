@@ -23,7 +23,7 @@ import {
 import { getAllUnit } from "../../../controller/measureUnitController";
 import { Picker } from '@react-native-picker/picker';
 import { getAllCategory } from "../../../controller/FoodCategoryController";
-
+import { getUserFromStorage } from "../../../controller/UserController";
 
 const GroupFoodScreen = ({ route, navigation }) => {
   const { groupId } = route.params;
@@ -126,7 +126,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
         name: addingItem.name,
         type: addingItem.type,
         description: addingItem.description,
-        image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+        imageUrl: "https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg",
         groupId: groupId,
         ownerId: user.id,
         unitName: addingItem.unitName,
@@ -149,7 +149,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
       name: editingItem.name,
       type: editingItem.type,
       description: editingItem.description,
-      image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+      imageUrl: "https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg",
       groupId: groupId,
       ownerId: ownerId,
       unitName: editingItem.unitName,
@@ -179,7 +179,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
       name: item.name,
       type: item.type,
       description: item.description,
-      image: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.foodiesfeed.com%2F&psig=AOvVaw3TBquWpXhi7sEyyiNo5aWL&ust=1735636849376000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCOCchaaVz4oDFQAAAAAdAAAAABAE",
+      image: "https://www.foodiesfeed.com/wp-content/uploads/2023/06/burger-with-melted-cheese.jpg",
       groupId: item.groupId,
       ownerId: item.owner.id,
       unitName: item.unitName,
@@ -355,7 +355,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
                         ))}
                     </Picker>
                     <Text style={styles.selected}>
-                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.unitName || 'None'}
+                        Selected Unit: {editingItem?.unitName || 'None'}
                     </Text>
                       
                     <Text style={styles.label}>Select a category:</Text>
@@ -369,7 +369,7 @@ const GroupFoodScreen = ({ route, navigation }) => {
                         ))}
                     </Picker>
                     <Text style={styles.selected}>
-                        Selected Unit: {unit.find((u) => u.id === selectedUnit)?.name || 'None'}
+                        Selected Unit: {editingItem?.foodCategoryAlias || 'None'}
                     </Text>
                 
                     <View style={styles.buttonHolder}>

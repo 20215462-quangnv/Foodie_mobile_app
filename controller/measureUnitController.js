@@ -1,6 +1,6 @@
 import { getToken } from "./AuthController";
 
-const API_URL = "http://192.168.0.6:8080/api/admin/unit";
+const API_URL = "http://13.229.127.51:8080/api/admin/unit";
 
 const getBearerAuth = async () => {
   const token = await getToken();

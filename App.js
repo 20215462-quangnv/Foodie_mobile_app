@@ -35,6 +35,7 @@ import UnitControllerScreen from "./page/adminPage/UnitTab/UnitControllerScreen"
 import CategoryControllerScreen from "./page/adminPage/UnitTab/CategoryControllerScreen";
 import UserControllerScreen from "./page/adminPage/UserControllerScreen";
 import RegisterScreen from "./page/RegisterScreen";
+import TaskShoppingListScreen from "./page/NewScreenTab/GroupTab/TaskShoppingListScreen";
 const Stack = createStackNavigator();
 
 // Create wrapped component outside of RootNavigator
