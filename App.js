@@ -28,6 +28,7 @@ import EditProfileScreen from "./page/NewScreenTab/ProfileTab/EditProfileScreen"
 import ChangePasswordScreen from "./page/NewScreenTab/ProfileTab/ChangePasswordScreen";
 import TaskDetailsScreen from "./page/NewScreenTab/Recipetab/TaskScreen";
 import GroupShoppingListScreen from "./page/NewScreenTab/GroupTab/GroupShoppingListScreen";
+import TaskShoppingListScreen from "./page/NewScreenTab/GroupTab/TaskScreen";
 const Stack = createStackNavigator();
 
 // Create wrapped component outside of RootNavigator
@@ -140,6 +141,21 @@ const RootNavigator = () => {
         options={{
           headerShown: true,
           title: "Shopping List",
+          headerStyle: {
+            backgroundColor: "#4EA72E",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+        }}
+      />
+      <Stack.Screen
+        name="TaskShoppingListScreen"
+        component={TaskShoppingListScreen}
+        options={{
+          headerShown: true,
+          title: "Task",
           headerStyle: {
             backgroundColor: "#4EA72E",
           },

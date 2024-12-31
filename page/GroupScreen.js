@@ -353,43 +353,6 @@ const GroupScreen = ({ route }) => {
     [showUpdateModal, group, handleUpdateSubmit]
   );
 
-  const AddMemberModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={showAddMemberModal}
-      onRequestClose={() => setShowAddMemberModal(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Add New Member</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter member's email"
-            onChangeText={(text) => setNewMemberEmail(text)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TouchableOpacity
-            style={styles.updateButton}
-            onPress={() => {
-              handleAddMember();
-              setShowAddMemberModal(false);
-            }}
-          >
-            <Text style={styles.buttonText}>Add Member</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setShowAddMemberModal(false)}
-          >
-            <Text style={styles.closeButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
   const GroupManagementModal = () => (
     <Modal
       animationType="slide"
@@ -480,7 +443,7 @@ const GroupScreen = ({ route }) => {
         <View style={styles.groupHeader}>
           <View style={styles.headerContent}>
             <View style={styles.headerTextContainer}>
-              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+              <TouchableOpacity style={[styles.backButton, { zIndex: 1 }]} onPress={handleGoBack}>
                 <Icon name="arrow-left" size={30} color="white" />
               </TouchableOpacity>
               <Text style={styles.groupName}>{group.name}</Text>
@@ -515,7 +478,40 @@ const GroupScreen = ({ route }) => {
       <GroupManagementModal />
       <MembersModal />
       <UpdateGroupModal />
-      <AddMemberModal />
+      <Modal
+      animationType="slide"
+      // transparent={true}
+      visible={showAddMemberModal}
+      // onRequestClose={() => setShowAddMemberModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Add New Member</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter member's email"
+            onChangeText={(text) => {setNewMemberEmail(text)}}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity
+            style={styles.updateButton}
+            onPress={() => {
+              handleAddMember();
+              setShowAddMemberModal(false);
+            }}
+          >
+            <Text style={styles.buttonText}>Add Member</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowAddMemberModal(false)}
+          >
+            <Text style={styles.closeButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
     </View>
   );
 };
@@ -651,18 +647,19 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
-  },
-  modalView: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
     padding: 20,
-    shadowColor: "#000",
+  },
+
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 25,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: -4,
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -684,10 +681,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 25,
+    textAlign: 'center',
   },
+
   memberItem: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -705,40 +705,52 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   closeButton: {
-    backgroundColor: "#4EA72E",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
+
   closeButtonText: {
-    color: "#fff",
+    color: '#666',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: '600',
   },
   input: {
-    height: 40,
+    backgroundColor: '#f8f8f8',
+    padding: 15,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: '#e0e0e0',
+    fontSize: 16,
+    marginBottom: 20,
+    color: '#333',
   },
   textArea: {
     height: 100,
     textAlignVertical: "top",
   },
   updateButton: {
-    backgroundColor: "#4EA72E",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
+    backgroundColor: '#4EA72E',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#4EA72E',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 3,
   },
+
   buttonText: {
-    color: "#fff",
+    color: 'white',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: '600',
   },
   backButton: {
     top: 10
