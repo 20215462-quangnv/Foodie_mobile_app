@@ -173,23 +173,25 @@ async function getUserByEmail(email) {
 // Get user report by day
 async function getUserReport(day) {
   const bearerAuth = await getBearerAuth();
-  return fetch(`${BASE_URL}/report/${day}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: bearerAuth,
-    },
-  })
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    })
-    .catch((error) => {
-      console.error("Error fetching user report:", error);
-      throw error;
+  try {
+    const response = await fetch(`${BASE_URL}/report/${day}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: bearerAuth,
+      },
     });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Response report: ", JSON.stringify(data, null, 4));
+      return data;
+    }
+    throw new Error(`HTTP error! status: ${response.status}`);
+  } catch (error) {
+    console.error("Error fetching user report:", error);
+    throw error;
+  }
 }
 
 // Get all users

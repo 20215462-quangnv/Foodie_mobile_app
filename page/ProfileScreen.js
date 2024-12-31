@@ -36,7 +36,7 @@ const ProfileScreen = ({ navigation }) => {
 
   useEffect(() => {
     loadReportData(reportDays);
-  }, []);
+  }, [reportDays]);
 
   const loadDashboardData = async () => {
     try {
@@ -78,6 +78,45 @@ const ProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error("Error loading report:", error);
     }
+  };
+
+  const calculateStats = (reportData) => {
+    if (!reportData) return null;
+
+    const fridgeStats = {
+      totalItems: reportData.fridgeItems.length,
+      expiringSoon: reportData.fridgeItems.filter((item) => {
+        const expDate = new Date(item.expiredDate);
+        const now = new Date();
+        const daysUntilExpiry = (expDate - now) / (1000 * 60 * 60 * 24);
+        return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+      }).length,
+      expired: reportData.fridgeItems.filter(
+        (item) => new Date(item.expiredDate) < new Date()
+      ).length,
+      waitingItems: reportData.fridgeItems.filter(
+        (item) => item.status === "WAITING"
+      ).length,
+    };
+
+    const taskStats = {
+      total: reportData.shoppingLists.length,
+      completed: reportData.shoppingLists.filter((list) =>
+        list.details.every((item) => item.done)
+      ).length,
+      pending: reportData.shoppingLists.filter((list) =>
+        list.details.some((item) => !item.done)
+      ).length,
+      onTime: reportData.shoppingLists.filter((list) => {
+        const dueDate = new Date(list.date);
+        const completedDate = new Date(list.updatedAt);
+        return (
+          completedDate <= dueDate && list.details.every((item) => item.done)
+        );
+      }).length,
+    };
+
+    return { fridgeStats, taskStats };
   };
 
   const StatCard = ({ icon, title, value, color, subtitle }) => (
@@ -132,6 +171,16 @@ const ProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error("Error updating photo:", error);
       Alert.alert("Error", "Failed to access photo library");
+    }
+  };
+
+  const handleDaysChange = (text) => {
+    // Only allow positive numbers
+    const days = parseInt(text);
+    if (!isNaN(days) && days > 0) {
+      setReportDays(text);
+    } else if (text === "") {
+      setReportDays("");
     }
   };
 
@@ -202,14 +251,15 @@ const ProfileScreen = ({ navigation }) => {
       {/* Analytics */}
       <View style={styles.analyticsContainer}>
         <View style={styles.analyticsHeader}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <Text style={styles.sectionTitle}>Activity Analysis</Text>
           <View style={styles.daysInputContainer}>
             <TextInput
               style={styles.daysInput}
               value={reportDays}
-              onChangeText={(text) => setReportDays(text)}
+              onChangeText={handleDaysChange}
               keyboardType="numeric"
               placeholder="Days"
+              maxLength={3}
             />
             <TouchableOpacity
               style={styles.refreshButton}
@@ -220,28 +270,77 @@ const ProfileScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View style={styles.statsGrid}>
-          <StatCard
-            icon="shopping-cart"
-            title="Shopping Lists"
-            value={reportData?.shoppingLists?.length || 0}
-            subtitle={`Last ${reportDays} days`}
-            color="#FFA41B"
-          />
-          <StatCard
-            icon="check-circle"
-            title="Completed Items"
-            value={
-              reportData?.shoppingLists?.reduce(
-                (acc, list) =>
-                  acc + list.details.filter((item) => item.done).length,
-                0
-              ) || 0
-            }
-            subtitle="Items checked off"
-            color="#4ECDC4"
-          />
-        </View>
+        {reportData && (
+          <>
+            <Text style={styles.analyticsSubtitle}>Fridge Items</Text>
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="archive"
+                title="Total Items"
+                value={calculateStats(reportData)?.fridgeStats.totalItems}
+                subtitle="In your fridge"
+                color="#4EA72E"
+              />
+              <StatCard
+                icon="exclamation-triangle"
+                title="Expiring Soon"
+                value={calculateStats(reportData)?.fridgeStats.expiringSoon}
+                subtitle="Within 7 days"
+                color="#FFA41B"
+              />
+            </View>
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="times-circle"
+                title="Expired"
+                value={calculateStats(reportData)?.fridgeStats.expired}
+                subtitle="Items expired"
+                color="#FF6B6B"
+              />
+              <StatCard
+                icon="clock-o"
+                title="Waiting"
+                value={calculateStats(reportData)?.fridgeStats.waitingItems}
+                subtitle="To be processed"
+                color="#4ECDC4"
+              />
+            </View>
+
+            <Text style={styles.analyticsSubtitle}>Shopping Tasks</Text>
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="list"
+                title="Total Tasks"
+                value={calculateStats(reportData)?.taskStats.total}
+                subtitle={`Last ${reportDays} days`}
+                color="#4EA72E"
+              />
+              <StatCard
+                icon="check-circle"
+                title="Completed"
+                value={calculateStats(reportData)?.taskStats.completed}
+                subtitle="All items done"
+                color="#4ECDC4"
+              />
+            </View>
+            <View style={styles.statsGrid}>
+              <StatCard
+                icon="clock-o"
+                title="Pending"
+                value={calculateStats(reportData)?.taskStats.pending}
+                subtitle="In progress"
+                color="#FFA41B"
+              />
+              <StatCard
+                icon="calendar-check-o"
+                title="On Time"
+                value={calculateStats(reportData)?.taskStats.onTime}
+                subtitle="Completed by due date"
+                color="#4EA72E"
+              />
+            </View>
+          </>
+        )}
       </View>
 
       {/* Action Buttons */}
@@ -320,6 +419,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: -5,
+    marginBottom: 10,
   },
   statCard: {
     flex: 1,
@@ -452,6 +552,13 @@ const styles = StyleSheet.create({
     borderColor: "#4EA72E",
     justifyContent: "center",
     alignItems: "center",
+  },
+  analyticsSubtitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#666",
+    marginTop: 20,
+    marginBottom: 10,
   },
 });
 
