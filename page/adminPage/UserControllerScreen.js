@@ -12,7 +12,9 @@ import {
     FlatList,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { getAllUser } from "../../controller/UserController";
+import { getAllUsers
+    
+ } from "../../controller/UserController";
 
 const UserControllerScreen = ({ navigation }) => {
     const [userList, setUserList] = useState([]);
@@ -21,7 +23,7 @@ const UserControllerScreen = ({ navigation }) => {
     useEffect(() => {
         async function fetchData() {
             try {
-                const data = await getAllUser(); 
+                const data = await getAllUsers(); 
                 console.log("userList: ", data.data);
                 setUserList(data.data);
             } catch (error) {

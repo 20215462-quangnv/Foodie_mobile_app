@@ -1,5 +1,5 @@
 import { getToken } from "../controller/AuthController";
-const API_URL = "http://192.168.0.6:8080/api/recipe";
+const API_URL = "http://192.168.43.107:8080/api/recipe";
 
 // Hàm để lấy Bearer token
 const getBearerAuth = async () => {

@@ -23,34 +23,38 @@ import { getUserProfile } from "../../../controller/UserController";
 
 
 const TaskShoppingListScreen = ({ route, navigation }) => {
-  const { listId, groupId } = route.params;
-  const [tasks, settasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {tasks, listId, groupId } = route.params;
+  const [listtask, setListTask] = useState(tasks);
   const [addingItem, setAddingItem] = useState({});
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
+  const [showFoodSelectModal, setShowFoodSelectModal] = useState(false);
   const [idToMapUrl, setIdToMapUrl] = useState({});
   const [foods, setFoods] = useState([]);
   const [user, setUser] = useState(null);
 
-  const loadTasks = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllTaskByList(listId);
-    //   console.log(response.data)
-      setLists(response.data.map(item => ({
-        id: item.id,
-        quantity: item.quantity,
-        done: item.done,
-        foodName: item.foodName,
-        foodImage: item.foodImage
-      }))); 
-    } catch (error) {
-      console.error("Error loading Lists:", error);
-      Alert.alert("Error", "Failed to load Lists");
-    } finally {
-      setLoading(false);
-    }
-  };
+   useEffect(() => {
+    setListTask(tasks);
+      }, [tasks]);
+
+  // const loadTasks = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await getAllTaskByList(listId);
+  //   //   console.log(response.data)
+  //     settasks(response.data.map(item => ({
+  //       id: item.id,
+  //       quantity: item.quantity,
+  //       done: item.done,
+  //       foodName: item.foodName,
+  //       foodImage: item.foodImage
+  //     }))); 
+  //   } catch (error) {
+  //     console.error("Error loading Lists:", error);
+  //     Alert.alert("Error", "Failed to load Lists");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const loadFoods = async () => {
     try {
@@ -67,16 +71,21 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
       console.error("Error loading food", err)
     }
   }
+  const handleShowChooseFood =()=>{
+    if(!showFoodSelectModal)
+      setShowFoodSelectModal(true);
+    else setShowFoodSelectModal(false);
+  }
 
   useEffect(() => {
     loadFoods();
   }, []);
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
+  // useEffect(() => {
+  //   loadTasks();
+  // }, []);
 
-  const handleDeleteList = async (listId) => {
+  const handleDeleteTask = async (taskId) => {
     Alert.alert("Delete Task", "Are you sure you want to delete this Task?", [
       { text: "Cancel", style: "cancel" },
       {
@@ -84,7 +93,7 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
         style: "destructive",
         onPress: async () => {
           try {
-            await deleteShoppingList(ListId);
+            await deleteTask(taskId);
             loadLists(); // Refresh the list
             Alert.alert("Success", "Task deleted successfully");
           } catch (error) {
@@ -121,31 +130,59 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
 //         console.error('Failed to create list:', error);
 //       });
 //   }
+const handleChooseFood = (food) => {
+  setAddingItem({ ...addingItem, food: food})
+}
+
+const handleSaveAddedItem = () =>{
+  const newItem = {
+    listId: listId,
+    foodId: addingItem.food.id,
+    quantity : addingItem.quantity,
+    done: false,
+  }
+  createTask(newItem)
+  .then((createdTask) => {
+    setListTask((prevItems) => [...prevItems, createdTask.data]);
+      setShowFoodSelectModal(false);
+      setAddItemModalVisible(false);
+      console.log('Item successfully added:', createdTask); 
+  })
+  .catch((error) => {
+    console.error('Failed to create recipe:', error);
+  });
+}
 
   const rederTask = ({ item }) => (
    
     <View style={styles.foodItem}>
        <View style={styles.foodInfo}>
-        <Image  style={styles.imageWarning}  source={{ uri: item.imageUrl }}></Image>
+        <Image  style={styles.imageWarning}  source={{ uri: item.foodImage }}></Image>
       </View>
       <View style={styles.foodInfo}>
-        <Text style={styles.foodName}>{item.name}</Text>
+        <Text style={styles.foodName}>{item.foodName}</Text>
         <Text style={styles.foodDescription}>{item.quantity}</Text>
-        <Text style={styles.foodDescription}>{item.done}</Text>
+        <Text style={styles.foodDescription}>{item.done ? 'done' : 'not done'}</Text>
       </View>
+      <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => handleDeleteTask(item.id)}
+          >
+            <Icon name="trash" size={20} color="#FF6B6B" />
+          </TouchableOpacity>
     </View>
   );
 
-  if (loading) {
-    return (
-      <ActivityIndicator style={styles.loader} size="large" color="#4EA72E" />
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <ActivityIndicator style={styles.loader} size="large" color="#4EA72E" />
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={tasks}
+        data={listtask}
         renderItem={rederTask}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
@@ -176,13 +213,6 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
                             onChangeText={(text) => setAddingItem({ ...addingItem, quantity: text })}
                             placeholder="quantity"
                         />
-                        <TextInput
-                            style={styles.modalInput}
-                          
-                            onChangeText={(text) => setAddingItem({ ...addingItem, done: text })}
-                            placeholder="status"
-                          
-                        />
                     {addingItem.food &&
                         <View style={styles.foodSelectItem}>
                             <Image source={{ uri: addingItem.food.imageUrl }} style={styles.foodImage} />
@@ -202,7 +232,7 @@ const TaskShoppingListScreen = ({ route, navigation }) => {
                       {showFoodSelectModal && (
                         <View style={styles.foodSelectModal}>
                             <Text style={styles.foodSelectTitle}>Select a Food</Text>
-                            {listFood.map((food) => (
+                            {foods.map((food) => (
                             <TouchableOpacity
                                 key={food.id}
                                 style={styles.foodSelectItem}
@@ -349,11 +379,11 @@ modalBackground: {
   backgroundColor: "rgba(0, 0, 0, 0.5)",
 },
 modalContainer: {
-  flex: 1,
   backgroundColor: "#fff",
   padding: 20,
   borderRadius: 10,
-  width: 360,
+  width: 300,
+  height: 200,
   margin: 50,
 },
 modalTitle: {
@@ -382,6 +412,15 @@ buttonHolder: {
   justifyContent: 'space-between',
 },
 addlistButton: {
+  marginTop: 48,
+  marginBottom: 12,
+  padding: 10,
+  backgroundColor: "#4CAF50",
+  borderRadius: 5,
+  alignItems: 'center',
+  textAlign: 'center',
+},
+addFoodButton: {
   marginTop: 48,
   marginBottom: 12,
   padding: 10,
@@ -438,6 +477,44 @@ foodImage: {
   borderRadius: 8,
   marginRight: 10,
   resizeMode: 'cover',
+},
+foodItem: {
+  flexDirection: "row",
+  padding: 15,
+  backgroundColor: "#fff",
+  borderRadius: 10,
+  marginBottom: 10,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.1,
+  shadowRadius: 3.84,
+  elevation: 5,
+},
+foodInfo: {
+  flex: 1,
+},
+foodName: {
+  fontSize: 18,
+  fontWeight: "600",
+  color: "#333",
+  marginBottom: 4,
+},
+foodDescription: {
+  fontSize: 14,
+  color: "#666",
+  marginBottom: 4,
+},
+foodQuantity: {
+  fontSize: 14,
+  color: "#4EA72E",
+  fontWeight: "500",
+},
+foodActions: {
+  flexDirection: "row",
+  alignItems: "center",
 },
 });
 

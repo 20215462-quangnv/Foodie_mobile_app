@@ -14,27 +14,11 @@ const GroupManagementScreen = ({ route, navigation }) => {
 
   const managementOptions = [
     {
-      icon: "list-alt",
-      title: "Recipes",
-      description: "Manage group recipes",
-      onPress: () => {
-        // Handle recipes
-      },
-    },
-    {
       icon: "birthday-cake",
       title: "Foods",
       description: "Manage group foods",
       onPress: () => {
         navigation.navigate("GroupFoodScreen", { groupId });
-      },
-    },
-    {
-      icon: "calendar",
-      title: "Meal Plans",
-      description: "Plan meals for the group",
-      onPress: () => {
-        // Handle meal plans
       },
     },
     {

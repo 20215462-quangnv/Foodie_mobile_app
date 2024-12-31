@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://192.168.0.6:8080/api/user/auth/login";
+const API_URL = "http://192.168.43.107:8080/api/user/auth/login";
 import { useNavigation } from "@react-navigation/native";
 
 // Lưu token vào AsyncStorage
@@ -63,7 +63,7 @@ async function Login(email, password, navigation) {
 
 async function Register(body, navigation) {
   try {
-    const response = await fetch("http://192.168.0.6:8080/api/user/auth/register", {
+    const response = await fetch("http://192.168.43.107:8080/api/user/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
